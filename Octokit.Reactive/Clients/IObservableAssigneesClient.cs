@@ -21,7 +21,7 @@ namespace Octokit.Reactive
         /// Gets all the available assignees (owner + collaborators) to which issues may be assigned.
         /// </summary>
         /// <param name="repositoryId">The Id of the repository</param>
-        IObservable<User> GetAllForRepository(int repositoryId);
+        IObservable<User> GetAllForRepository(long repositoryId);
 
         /// <summary>
         /// Gets all the available assignees (owner + collaborators) to which issues may be assigned.
@@ -36,7 +36,7 @@ namespace Octokit.Reactive
         /// </summary>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="options">The options to change API's behaviour.</param>
-        IObservable<User> GetAllForRepository(int repositoryId, ApiOptions options);
+        IObservable<User> GetAllForRepository(long repositoryId, ApiOptions options);
 
         /// <summary>
         /// Checks to see if a user is an assignee for a repository.
@@ -47,10 +47,30 @@ namespace Octokit.Reactive
         IObservable<bool> CheckAssignee(string owner, string name, string assignee);
 
         /// <summary>
+        /// Add assignees to a specified Issue.
+        /// </summary>
+        /// <param name="owner">The owner of the repository</param>
+        /// <param name="name">The name of the repository</param>
+        /// <param name="number">The issue number</param>
+        /// <param name="assignees">List of names of assignees to add</param>
+        /// <returns></returns>
+        IObservable<Issue> AddAssignees(string owner, string name, int number, AssigneesUpdate assignees);
+
+        /// <summary>
+        /// Remove assignees from a specified Issue.
+        /// </summary>
+        /// <param name="owner">The owner of the repository</param>
+        /// <param name="name">The name of the repository</param>
+        /// <param name="number">The issue number</param>
+        /// <param name="assignees">List of assignees to remove </param>
+        /// <returns></returns>
+        IObservable<Issue> RemoveAssignees(string owner, string name, int number, AssigneesUpdate assignees);
+
+        /// <summary>
         /// Checks to see if a user is an assignee for a repository.
         /// </summary>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="assignee">Username of the prospective assignee</param>
-        IObservable<bool> CheckAssignee(int repositoryId, string assignee);
+        IObservable<bool> CheckAssignee(long repositoryId, string assignee);
     }
 }

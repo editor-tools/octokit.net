@@ -13,11 +13,11 @@ public class IssueCommentsClientTests
     {
         readonly IGitHubClient _github;
         readonly IIssueCommentsClient _issueCommentsClient;
-        
+
         const string owner = "octokit";
         const string name = "octokit.net";
         const int id = 12067722;
-        const int repositoryId = 7528679;
+        const long repositoryId = 7528679;
 
         public TheGetMethod()
         {
@@ -76,7 +76,7 @@ public class IssueCommentsClientTests
 
         const string owner = "octokit";
         const string name = "octokit.net";
-        const int repositoryId = 7528679;
+        const long repositoryId = 7528679;
 
         public TheGetAllForRepositoryMethod()
         {
@@ -220,7 +220,7 @@ public class IssueCommentsClientTests
             using (var context = await _github.CreateRepositoryContext(Helper.MakeNameWithTimestamp("IssueCommentsReactionTests")))
             {
                 var commentIds = new List<int>();
-                
+
                 // Create multiple test issues
                 for (int count = 1; count <= numberToCreate; count++)
                 {
@@ -261,7 +261,7 @@ public class IssueCommentsClientTests
         const string owner = "octokit";
         const string name = "octokit.net";
         const int number = 1115;
-        const int repositoryId = 7528679;
+        const long repositoryId = 7528679;
 
         public TheGetAllForIssueMethod()
         {
