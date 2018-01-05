@@ -23,7 +23,7 @@ namespace Octokit.Reactive
         /// </summary>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated</exception>
-        IObservable<User> GetAllStargazers(int repositoryId);
+        IObservable<User> GetAllStargazers(long repositoryId);
 
         /// <summary>
         /// Retrieves all of the stargazers for the passed repository
@@ -33,14 +33,14 @@ namespace Octokit.Reactive
         /// <param name="options">Options for changing the API response</param>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated</exception>
         IObservable<User> GetAllStargazers(string owner, string name, ApiOptions options);
-        
+
         /// <summary>
         /// Retrieves all of the stargazers for the passed repository
         /// </summary>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="options">Options for changing the API response</param>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated</exception>
-        IObservable<User> GetAllStargazers(int repositoryId, ApiOptions options);
+        IObservable<User> GetAllStargazers(long repositoryId, ApiOptions options);
 
         /// <summary>
         /// Retrieves all of the stargazers for the passed repository with star creation timestamps.
@@ -49,13 +49,13 @@ namespace Octokit.Reactive
         /// <param name="name">The name of the repository</param>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated.</exception>
         IObservable<UserStar> GetAllStargazersWithTimestamps(string owner, string name);
-        
+
         /// <summary>
         /// Retrieves all of the stargazers for the passed repository with star creation timestamps.
         /// </summary>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated.</exception>
-        IObservable<UserStar> GetAllStargazersWithTimestamps(int repositoryId);
+        IObservable<UserStar> GetAllStargazersWithTimestamps(long repositoryId);
 
         /// <summary>
         /// Retrieves all of the stargazers for the passed repository with star creation timestamps.
@@ -72,14 +72,14 @@ namespace Octokit.Reactive
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="options">Options for changing the API response</param>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated.</exception>
-        IObservable<UserStar> GetAllStargazersWithTimestamps(int repositoryId, ApiOptions options);
+        IObservable<UserStar> GetAllStargazersWithTimestamps(long repositoryId, ApiOptions options);
 
         /// <summary>
         /// Retrieves all of the starred <see cref="Repository"/>(ies) for the current user
         /// </summary>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated</exception>
         IObservable<Repository> GetAllForCurrent();
-        
+
         /// <summary>
         /// Retrieves all of the starred <see cref="Repository"/>(ies) for the current user
         /// </summary>
@@ -91,7 +91,7 @@ namespace Octokit.Reactive
         /// </summary>
         /// <exception cref="AuthorizationException">Thrown if the client is not authenticated.</exception>
         IObservable<RepositoryStar> GetAllForCurrentWithTimestamps();
-        
+
         /// <summary>
         /// Retrieves all of the starred <see cref="Repository"/>(ies) for the current user with star creation timestamps.
         /// </summary>

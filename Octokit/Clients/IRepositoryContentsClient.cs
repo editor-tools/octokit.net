@@ -22,6 +22,7 @@ namespace Octokit
         /// <param name="owner">The owner of the repository</param>
         /// <param name="name">The name of the repository</param>
         /// <param name="path">The content path</param>
+        [ExcludeFromPaginationApiOptionsConventionTest("Pagination not supported by GitHub API (tested 29/08/2017)")]
         Task<IReadOnlyList<RepositoryContent>> GetAllContents(string owner, string name, string path);
 
         /// <summary>
@@ -32,7 +33,8 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="path">The content path</param>
-        Task<IReadOnlyList<RepositoryContent>> GetAllContents(int repositoryId, string path);
+        [ExcludeFromPaginationApiOptionsConventionTest("Pagination not supported by GitHub API (tested 29/08/2017)")]
+        Task<IReadOnlyList<RepositoryContent>> GetAllContents(long repositoryId, string path);
 
         /// <summary>
         /// Returns the contents of the root directory in a repository.
@@ -42,6 +44,7 @@ namespace Octokit
         /// </remarks>
         /// <param name="owner">The owner of the repository</param>
         /// <param name="name">The name of the repository</param>
+        [ExcludeFromPaginationApiOptionsConventionTest("Pagination not supported by GitHub API (tested 29/08/2017)")]
         Task<IReadOnlyList<RepositoryContent>> GetAllContents(string owner, string name);
 
         /// <summary>
@@ -51,7 +54,8 @@ namespace Octokit
         /// See the <a href="https://developer.github.com/v3/repos/contents/#get-contents">API documentation</a> for more information.
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
-        Task<IReadOnlyList<RepositoryContent>> GetAllContents(int repositoryId);
+        [ExcludeFromPaginationApiOptionsConventionTest("Pagination not supported by GitHub API (tested 29/08/2017)")]
+        Task<IReadOnlyList<RepositoryContent>> GetAllContents(long repositoryId);
 
         /// <summary>
         /// Returns the contents of a file or directory in a repository.
@@ -63,6 +67,7 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="path">The content path</param>
         /// <param name="reference">The name of the commit/branch/tag. Default: the repository’s default branch (usually master)</param>
+        [ExcludeFromPaginationApiOptionsConventionTest("Pagination not supported by GitHub API (tested 29/08/2017)")]
         Task<IReadOnlyList<RepositoryContent>> GetAllContentsByRef(string owner, string name, string path, string reference);
 
         /// <summary>
@@ -74,7 +79,8 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="path">The content path</param>
         /// <param name="reference">The name of the commit/branch/tag. Default: the repository’s default branch (usually master)</param>
-        Task<IReadOnlyList<RepositoryContent>> GetAllContentsByRef(int repositoryId, string path, string reference);
+        [ExcludeFromPaginationApiOptionsConventionTest("Pagination not supported by GitHub API (tested 29/08/2017)")]
+        Task<IReadOnlyList<RepositoryContent>> GetAllContentsByRef(long repositoryId, string path, string reference);
 
         /// <summary>
         /// Returns the contents of the root directory in a repository.
@@ -86,6 +92,7 @@ namespace Octokit
         /// <param name="owner">The owner of the repository</param>
         /// <param name="name">The name of the repository</param>
         /// <param name="reference">The name of the commit/branch/tag. Default: the repository’s default branch (usually master)</param>
+        [ExcludeFromPaginationApiOptionsConventionTest("Pagination not supported by GitHub API (tested 29/08/2017)")]
         Task<IReadOnlyList<RepositoryContent>> GetAllContentsByRef(string owner, string name, string reference);
 
         /// <summary>
@@ -97,7 +104,8 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="reference">The name of the commit/branch/tag. Default: the repository’s default branch (usually master)</param>
-        Task<IReadOnlyList<RepositoryContent>> GetAllContentsByRef(int repositoryId, string reference);
+        [ExcludeFromPaginationApiOptionsConventionTest("Pagination not supported by GitHub API (tested 29/08/2017)")]
+        Task<IReadOnlyList<RepositoryContent>> GetAllContentsByRef(long repositoryId, string reference);
 
         /// <summary>
         /// Gets the preferred README for the specified repository.
@@ -118,7 +126,7 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
-        Task<Readme> GetReadme(int repositoryId);
+        Task<Readme> GetReadme(long repositoryId);
 
         /// <summary>
         /// Gets the preferred README's HTML for the specified repository.
@@ -139,7 +147,7 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
-        Task<string> GetReadmeHtml(int repositoryId);
+        Task<string> GetReadmeHtml(long repositoryId);
 
         /// <summary>
         /// Get an archive of a given repository's contents
@@ -154,7 +162,7 @@ namespace Octokit
         /// </summary>
         /// <remarks>https://developer.github.com/v3/repos/contents/#get-archive-link</remarks>
         /// <param name="repositoryId">The Id of the repository</param>
-        Task<byte[]> GetArchive(int repositoryId);
+        Task<byte[]> GetArchive(long repositoryId);
 
         /// <summary>
         /// Get an archive of a given repository's contents, in a specific format
@@ -171,7 +179,7 @@ namespace Octokit
         /// <remarks>https://developer.github.com/v3/repos/contents/#get-archive-link</remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="archiveFormat">The format of the archive. Can be either tarball or zipball</param>
-        Task<byte[]> GetArchive(int repositoryId, ArchiveFormat archiveFormat);
+        Task<byte[]> GetArchive(long repositoryId, ArchiveFormat archiveFormat);
 
         /// <summary>
         /// Get an archive of a given repository's contents, using a specific format and reference
@@ -190,7 +198,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="archiveFormat">The format of the archive. Can be either tarball or zipball</param>
         /// <param name="reference">A valid Git reference.</param>
-        Task<byte[]> GetArchive(int repositoryId, ArchiveFormat archiveFormat, string reference);
+        Task<byte[]> GetArchive(long repositoryId, ArchiveFormat archiveFormat, string reference);
 
         /// <summary>
         /// Get an archive of a given repository's contents, in a specific format
@@ -211,7 +219,7 @@ namespace Octokit
         /// <param name="archiveFormat">The format of the archive. Can be either tarball or zipball</param>
         /// <param name="reference">A valid Git reference.</param>
         /// <param name="timeout"> Time span until timeout </param>
-        Task<byte[]> GetArchive(int repositoryId, ArchiveFormat archiveFormat, string reference, TimeSpan timeout);
+        Task<byte[]> GetArchive(long repositoryId, ArchiveFormat archiveFormat, string reference, TimeSpan timeout);
 
         /// <summary>
         /// Creates a commit that creates a new file in a repository.
@@ -228,7 +236,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="path">The path to the file</param>
         /// <param name="request">Information about the file to create</param>
-        Task<RepositoryContentChangeSet> CreateFile(int repositoryId, string path, CreateFileRequest request);
+        Task<RepositoryContentChangeSet> CreateFile(long repositoryId, string path, CreateFileRequest request);
 
         /// <summary>
         /// Creates a commit that updates the contents of a file in a repository.
@@ -245,7 +253,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="path">The path to the file</param>
         /// <param name="request">Information about the file to update</param>
-        Task<RepositoryContentChangeSet> UpdateFile(int repositoryId, string path, UpdateFileRequest request);
+        Task<RepositoryContentChangeSet> UpdateFile(long repositoryId, string path, UpdateFileRequest request);
 
         /// <summary>
         /// Creates a commit that deletes a file in a repository.
@@ -262,7 +270,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="path">The path to the file</param>
         /// <param name="request">Information about the file to delete</param>
-        Task DeleteFile(int repositoryId, string path, DeleteFileRequest request);
+        Task DeleteFile(long repositoryId, string path, DeleteFileRequest request);
     }
 
     /// <summary>

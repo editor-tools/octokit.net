@@ -2,9 +2,7 @@
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-#if NET_45
 using System.Collections.Generic;
-#endif
 
 namespace Octokit
 {
@@ -67,15 +65,6 @@ namespace Octokit
         /// <returns>The API resource.</returns>
         /// <exception cref="ApiException">Thrown when an API error occurs.</exception>
         public static Task<IApiResponse<T>> GetResponse<T>(this IConnection connection, Uri uri)
-        {
-            Ensure.ArgumentNotNull(connection, "connection");
-            Ensure.ArgumentNotNull(uri, "uri");
-
-            return connection.Get<T>(uri, null, null);
-        }
-
-        [Obsolete("Octokit's HTTP library now follows redirects by default - this API will be removed in a future release")]
-        public static Task<IApiResponse<T>> GetRedirect<T>(this IConnection connection, Uri uri)
         {
             Ensure.ArgumentNotNull(connection, "connection");
             Ensure.ArgumentNotNull(uri, "uri");

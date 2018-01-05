@@ -40,7 +40,7 @@ namespace Octokit
         /// <remarks>http://developer.github.com/v3/issues/comments/#get-a-single-comment</remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="id">The issue comment id</param>
-        public Task<IssueComment> Get(int repositoryId, int id)
+        public Task<IssueComment> Get(long repositoryId, int id)
         {
             return ApiConnection.Get<IssueComment>(ApiUrls.IssueComment(repositoryId, id), null, AcceptHeaders.ReactionsPreview);
         }
@@ -56,7 +56,7 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
             Ensure.ArgumentNotNullOrEmptyString(name, "name");
 
-            return GetAllForRepository(owner, name, ApiOptions.None);
+            return GetAllForRepository(owner, name, new IssueCommentRequest(), ApiOptions.None);
         }
 
         /// <summary>
@@ -64,9 +64,9 @@ namespace Octokit
         /// </summary>
         /// <remarks>http://developer.github.com/v3/issues/comments/#list-comments-in-a-repository</remarks>
         /// <param name="repositoryId">The Id of the repository</param>
-        public Task<IReadOnlyList<IssueComment>> GetAllForRepository(int repositoryId)
+        public Task<IReadOnlyList<IssueComment>> GetAllForRepository(long repositoryId)
         {
-            return GetAllForRepository(repositoryId, ApiOptions.None);
+            return GetAllForRepository(repositoryId, new IssueCommentRequest(), ApiOptions.None);
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(name, "name");
             Ensure.ArgumentNotNull(options, "options");
 
-            return ApiConnection.GetAll<IssueComment>(ApiUrls.IssueComments(owner, name), null, AcceptHeaders.ReactionsPreview, options);
+            return GetAllForRepository(owner, name, new IssueCommentRequest(), options);
         }
 
         /// <summary>
@@ -91,11 +91,73 @@ namespace Octokit
         /// <remarks>http://developer.github.com/v3/issues/comments/#list-comments-in-a-repository</remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="options">Options for changing the API response</param>
-        public Task<IReadOnlyList<IssueComment>> GetAllForRepository(int repositoryId, ApiOptions options)
+        public Task<IReadOnlyList<IssueComment>> GetAllForRepository(long repositoryId, ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, "options");
 
-            return ApiConnection.GetAll<IssueComment>(ApiUrls.IssueComments(repositoryId), null, AcceptHeaders.ReactionsPreview, options);
+            return GetAllForRepository(repositoryId, new IssueCommentRequest(), options);
+        }
+
+        /// <summary>
+        /// Gets Issue Comments for a repository.
+        /// </summary>
+        /// <remarks>http://developer.github.com/v3/issues/comments/#list-comments-in-a-repository</remarks>
+        /// <param name="owner">The owner of the repository</param>
+        /// <param name="name">The name of the repository</param>
+        /// <param name="request">The sorting <see cref="IssueCommentRequest">parameters</see></param>
+        public Task<IReadOnlyList<IssueComment>> GetAllForRepository(string owner, string name, IssueCommentRequest request)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
+            Ensure.ArgumentNotNullOrEmptyString(name, "name");
+            Ensure.ArgumentNotNull(request, "request");
+
+            return GetAllForRepository(owner, name, request, ApiOptions.None);
+        }
+
+        /// <summary>
+        /// Gets Issue Comments for a repository.
+        /// </summary>
+        /// <remarks>http://developer.github.com/v3/issues/comments/#list-comments-in-a-repository</remarks>
+        /// <param name="repositoryId">The Id of the repository</param>
+        /// <param name="request">The sorting <see cref="IssueCommentRequest">parameters</see></param>
+        public Task<IReadOnlyList<IssueComment>> GetAllForRepository(long repositoryId, IssueCommentRequest request)
+        {
+            Ensure.ArgumentNotNull(request, "request");
+
+            return GetAllForRepository(repositoryId, request, ApiOptions.None);
+        }
+
+        /// <summary>
+        /// Gets Issue Comments for a repository.
+        /// </summary>
+        /// <remarks>http://developer.github.com/v3/issues/comments/#list-comments-in-a-repository</remarks>
+        /// <param name="owner">The owner of the repository</param>
+        /// <param name="name">The name of the repository</param>
+        /// <param name="request">The sorting <see cref="IssueCommentRequest">parameters</see></param>
+        /// <param name="options">Options for changing the API response</param>
+        public Task<IReadOnlyList<IssueComment>> GetAllForRepository(string owner, string name, IssueCommentRequest request, ApiOptions options)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
+            Ensure.ArgumentNotNullOrEmptyString(name, "name");
+            Ensure.ArgumentNotNull(request, "request");
+            Ensure.ArgumentNotNull(options, "options");
+
+            return ApiConnection.GetAll<IssueComment>(ApiUrls.IssueComments(owner, name), request.ToParametersDictionary(), AcceptHeaders.ReactionsPreview, options);
+        }
+
+        /// <summary>
+        /// Gets Issue Comments for a repository.
+        /// </summary>
+        /// <remarks>http://developer.github.com/v3/issues/comments/#list-comments-in-a-repository</remarks>
+        /// <param name="repositoryId">The Id of the repository</param>
+        /// <param name="request">The sorting <see cref="IssueCommentRequest">parameters</see></param>
+        /// <param name="options">Options for changing the API response</param>
+        public Task<IReadOnlyList<IssueComment>> GetAllForRepository(long repositoryId, IssueCommentRequest request, ApiOptions options)
+        {
+            Ensure.ArgumentNotNull(request, "request");
+            Ensure.ArgumentNotNull(options, "options");
+
+            return ApiConnection.GetAll<IssueComment>(ApiUrls.IssueComments(repositoryId), request.ToParametersDictionary(), AcceptHeaders.ReactionsPreview, options);
         }
 
         /// <summary>
@@ -119,7 +181,7 @@ namespace Octokit
         /// <remarks>http://developer.github.com/v3/issues/comments/#list-comments-on-an-issue</remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="number">The issue number</param>
-        public Task<IReadOnlyList<IssueComment>> GetAllForIssue(int repositoryId, int number)
+        public Task<IReadOnlyList<IssueComment>> GetAllForIssue(long repositoryId, int number)
         {
             return GetAllForIssue(repositoryId, number, ApiOptions.None);
         }
@@ -148,7 +210,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="number">The issue number</param>
         /// <param name="options">Options for changing the API response</param>
-        public Task<IReadOnlyList<IssueComment>> GetAllForIssue(int repositoryId, int number, ApiOptions options)
+        public Task<IReadOnlyList<IssueComment>> GetAllForIssue(long repositoryId, int number, ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, "options");
 
@@ -179,7 +241,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="number">The number of the issue</param>
         /// <param name="newComment">The new comment to add to the issue</param>
-        public Task<IssueComment> Create(int repositoryId, int number, string newComment)
+        public Task<IssueComment> Create(long repositoryId, int number, string newComment)
         {
             Ensure.ArgumentNotNull(newComment, "newComment");
 
@@ -210,7 +272,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="id">The comment id</param>
         /// <param name="commentUpdate">The modified comment</param>
-        public Task<IssueComment> Update(int repositoryId, int id, string commentUpdate)
+        public Task<IssueComment> Update(long repositoryId, int id, string commentUpdate)
         {
             Ensure.ArgumentNotNull(commentUpdate, "commentUpdate");
 
@@ -238,7 +300,7 @@ namespace Octokit
         /// <remarks>http://developer.github.com/v3/issues/comments/#delete-a-comment</remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="id">The comment id</param>
-        public Task Delete(int repositoryId, int id)
+        public Task Delete(long repositoryId, int id)
         {
             return ApiConnection.Delete(ApiUrls.IssueComment(repositoryId, id));
         }

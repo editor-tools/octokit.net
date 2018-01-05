@@ -64,7 +64,7 @@ namespace Octokit.Reactive
             Ensure.ArgumentNotNullOrEmptyString(org, "org");
             Ensure.ArgumentNotNull(options, "options");
 
-            return _connection.GetAndFlattenAllPages<Team>(ApiUrls.OrganizationTeams(org), options);
+            return _connection.GetAndFlattenAllPages<Team>(ApiUrls.OrganizationTeams(org), null, AcceptHeaders.NestedTeamsPreview, options);
         }
 
         /// <summary>
@@ -87,7 +87,33 @@ namespace Octokit.Reactive
         {
             Ensure.ArgumentNotNull(options, "options");
 
-            return _connection.GetAndFlattenAllPages<Team>(ApiUrls.UserTeams(), options);
+            return _connection.GetAndFlattenAllPages<Team>(ApiUrls.UserTeams(), null, AcceptHeaders.NestedTeamsPreview, options);
+        }
+
+        /// <summary>
+        /// Returns all child teams of the given team.
+        /// </summary>
+        /// <param name="id">The team identifier</param>
+        /// <remarks>
+        /// https://developer.github.com/v3/orgs/teams/#list-child-teams
+        /// </remarks>
+        public IObservable<Team> GetAllChildTeams(int id)
+        {
+            return GetAllChildTeams(id, ApiOptions.None);
+        }
+
+        /// <summary>
+        /// Returns all child teams of the given team.
+        /// </summary>
+        /// <param name="id">The team identifier</param>
+        /// <remarks>
+        /// https://developer.github.com/v3/orgs/teams/#list-child-teams
+        /// </remarks>
+        public IObservable<Team> GetAllChildTeams(int id, ApiOptions options)
+        {
+            Ensure.ArgumentNotNull(options, "options");
+
+            return _connection.GetAndFlattenAllPages<Team>(ApiUrls.TeamChildTeams(id), null, AcceptHeaders.NestedTeamsPreview, options);
         }
 
         /// <summary>
@@ -118,7 +144,39 @@ namespace Octokit.Reactive
         {
             Ensure.ArgumentNotNull(options, "options");
 
-            return _connection.GetAndFlattenAllPages<User>(ApiUrls.TeamMembers(id), options);
+            return _connection.GetAndFlattenAllPages<User>(ApiUrls.TeamMembers(id), null, AcceptHeaders.NestedTeamsPreview, options);
+        }
+
+        /// <summary>
+        /// Returns all members with the specified role in the given team of the given role.
+        /// </summary>
+        /// <remarks>
+        /// https://developer.github.com/v3/orgs/teams/#list-team-members
+        /// </remarks>
+        /// <param name="id">The team identifier</param>
+        /// <param name="request">The request filter</param>
+        public IObservable<User> GetAllMembers(int id, TeamMembersRequest request)
+        {
+            Ensure.ArgumentNotNull(request, nameof(request));
+
+            return GetAllMembers(id, request, ApiOptions.None);
+        }
+
+        /// <summary>
+        /// Returns all members with the specified role in the given team of the given role.
+        /// </summary>
+        /// <remarks>
+        /// https://developer.github.com/v3/orgs/teams/#list-team-members
+        /// </remarks>
+        /// <param name="id">The team identifier</param>
+        /// <param name="request">The request filter</param>
+        /// <param name="options">Options to change API behaviour.</param>
+        public IObservable<User> GetAllMembers(int id, TeamMembersRequest request, ApiOptions options)
+        {
+            Ensure.ArgumentNotNull(request, nameof(request));
+            Ensure.ArgumentNotNull(options, nameof(options));
+
+            return _connection.GetAndFlattenAllPages<User>(ApiUrls.TeamMembers(id), request.ToParametersDictionary(), AcceptHeaders.NestedTeamsPreview, options);
         }
 
         /// <summary>
@@ -160,17 +218,33 @@ namespace Octokit.Reactive
         /// Adds a <see cref="User"/> to a <see cref="Team"/>.
         /// </summary>
         /// <remarks>
-        /// See the <a href="https://developer.github.com/v3/orgs/teams/#add-team-member">API documentation</a> for more information.
+        /// See the <a href="https://developer.github.com/v3/orgs/teams/#add-or-update-team-membership">API documentation</a> for more information.
         /// </remarks>
         /// <param name="id">The team identifier.</param>
         /// <param name="login">The user to add to the team.</param>
-        /// <exception cref="ApiValidationException">Thrown if you attempt to add an organization to a team.</exception>
-        /// <returns>A <see cref="TeamMembership"/> result indicating the membership status</returns>
+        [Obsolete("Please use AddOrEditMembership instead")]
         public IObservable<TeamMembership> AddMembership(int id, string login)
         {
             Ensure.ArgumentNotNullOrEmptyString(login, "login");
 
             return _client.AddMembership(id, login).ToObservable();
+        }
+
+        /// <summary>
+        /// Adds a <see cref="User"/> to a <see cref="Team"/>.
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/orgs/teams/#add-or-update-team-membership">API documentation</a> for more information.
+        /// </remarks>
+        /// <param name="id">The team identifier.</param>
+        /// <param name="login">The user to add to the team.</param>
+        /// <param name="request">Additional parameters for the request</param>
+        public IObservable<TeamMembershipDetails> AddOrEditMembership(int id, string login, UpdateTeamMembership request)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(login, nameof(login));
+            Ensure.ArgumentNotNull(request, nameof(request));
+
+            return _client.AddOrEditMembership(id, login, request).ToObservable();
         }
 
         /// <summary>
@@ -195,12 +269,29 @@ namespace Octokit.Reactive
         /// </summary>
         /// <param name="id">The team to check.</param>
         /// <param name="login">The user to check.</param>
-        /// <returns>A <see cref="TeamMembership"/> result indicating the membership status</returns>
+        [Obsolete("Please use GetMembershipDetails instead")]
         public IObservable<TeamMembership> GetMembership(int id, string login)
         {
             Ensure.ArgumentNotNullOrEmptyString(login, "login");
 
             return _client.GetMembership(id, login).ToObservable();
+        }
+
+        /// <summary>
+        /// Gets whether the user with the given <paramref name="login"/> 
+        /// is a member of the team with the given <paramref name="id"/>.
+        /// A <see cref="NotFoundException"/> is thrown if the user is not a member.
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/orgs/teams/#get-team-membership">API documentation</a> for more information.
+        /// </remarks>
+        /// <param name="id">The team to check.</param>
+        /// <param name="login">The user to check.</param>
+        public IObservable<TeamMembershipDetails> GetMembershipDetails(int id, string login)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(login, "login");
+
+            return _client.GetMembershipDetails(id, login).ToObservable();
         }
 
         /// <summary>
@@ -224,7 +315,7 @@ namespace Octokit.Reactive
         {
             Ensure.ArgumentNotNull(options, "options");
 
-            return _connection.GetAndFlattenAllPages<Repository>(ApiUrls.TeamRepositories(id), null, AcceptHeaders.OrganizationPermissionsPreview, options);
+            return _connection.GetAndFlattenAllPages<Repository>(ApiUrls.TeamRepositories(id), null, AcceptHeaders.NestedTeamsPreview, options);
         }
 
         /// <summary>
@@ -294,6 +385,40 @@ namespace Octokit.Reactive
             Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
             Ensure.ArgumentNotNullOrEmptyString(repo, "repo");
             return _client.IsRepositoryManagedByTeam(id, owner, repo).ToObservable();
+        }
+
+        /// <summary>
+        /// List all pending invitations for the given team.
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/orgs/teams/#list-pending-team-invitations">API Documentation</a>
+        /// for more information.
+        /// </remarks>
+        /// <param name="id">The team identifier</param>
+        /// <returns></returns>
+        public IObservable<OrganizationMembershipInvitation> GetAllPendingInvitations(int id)
+        {
+            Ensure.ArgumentNotNull(id, nameof(id));
+
+            return GetAllPendingInvitations(id, ApiOptions.None);
+        }
+
+        /// <summary>
+        /// List all pending invitations for the given team.
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/orgs/teams/#list-pending-team-invitations">API Documentation</a>
+        /// for more information.
+        /// </remarks>
+        /// <param name="id">The team identifier</param>
+        /// <param name="options">Options to change API behaviour</param>
+        /// <returns></returns>
+        public IObservable<OrganizationMembershipInvitation> GetAllPendingInvitations(int id, ApiOptions options)
+        {
+            Ensure.ArgumentNotNull(id, nameof(id));
+            Ensure.ArgumentNotNull(options, nameof(options));
+
+            return _connection.GetAndFlattenAllPages<OrganizationMembershipInvitation>(ApiUrls.TeamPendingInvitations(id), null, AcceptHeaders.OrganizationMembershipPreview, options);
         }
     }
 }

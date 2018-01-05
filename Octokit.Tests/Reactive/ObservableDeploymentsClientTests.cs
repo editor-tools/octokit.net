@@ -17,7 +17,7 @@ namespace Octokit.Tests.Reactive
             private readonly ObservableDeploymentsClient _client;
             private const string owner = "owner";
             private const string name = "name";
-            private const int repositoryId = 1;
+            private const long repositoryId = 1;
 
             public TheGetAllMethod()
             {
@@ -60,7 +60,7 @@ namespace Octokit.Tests.Reactive
 
                 _githubClient.Connection.Received(1)
                     .Get<List<Deployment>>(Arg.Is<Uri>(u => u.ToString() == expectedUrl),
-                        Arg.Is<IDictionary<string, string>>(dictionary => dictionary.Count == 0), 
+                        Arg.Is<IDictionary<string, string>>(dictionary => dictionary.Count == 0),
                         Arg.Any<string>());
             }
 
@@ -73,7 +73,7 @@ namespace Octokit.Tests.Reactive
 
                 _githubClient.Connection.Received(1)
                     .Get<List<Deployment>>(Arg.Is<Uri>(u => u.ToString() == expectedUrl),
-                        Arg.Is<IDictionary<string, string>>(dictionary => dictionary.Count == 0), 
+                        Arg.Is<IDictionary<string, string>>(dictionary => dictionary.Count == 0),
                         Arg.Any<string>());
             }
 

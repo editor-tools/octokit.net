@@ -38,6 +38,7 @@ namespace Octokit.Reactive
             Oauth = new ObservableOauthClient(gitHubClient);
             Organization = new ObservableOrganizationsClient(gitHubClient);
             PullRequest = new ObservablePullRequestsClient(gitHubClient);
+            PullRequestReview = new ObservablePullRequestReviewsClient(gitHubClient);
             Repository = new ObservableRepositoriesClient(gitHubClient);
             User = new ObservableUsersClient(gitHubClient);
             Git = new ObservableGitDatabaseClient(gitHubClient);
@@ -53,6 +54,19 @@ namespace Octokit.Reactive
             get { return _gitHubClient.Connection; }
         }
 
+        /// <summary>
+        /// Set the GitHub Api request timeout.
+        /// Useful to set a specific timeout for lengthy operations, such as uploading release assets
+        /// </summary>
+        /// <remarks>
+        /// See more information here: https://technet.microsoft.com/library/system.net.http.httpclient.timeout(v=vs.110).aspx
+        /// </remarks>
+        /// <param name="timeout">The Timeout value</param>
+        public void SetRequestTimeout(TimeSpan timeout)
+        {
+            _gitHubClient.SetRequestTimeout(timeout);
+        }
+
         public IObservableAuthorizationsClient Authorization { get; private set; }
         public IObservableActivitiesClient Activity { get; private set; }
         public IObservableIssuesClient Issue { get; private set; }
@@ -60,6 +74,7 @@ namespace Octokit.Reactive
         public IObservableOauthClient Oauth { get; private set; }
         public IObservableOrganizationsClient Organization { get; private set; }
         public IObservablePullRequestsClient PullRequest { get; private set; }
+        public IObservablePullRequestReviewsClient PullRequestReview { get; private set; }
         public IObservableRepositoriesClient Repository { get; private set; }
         public IObservableGistsClient Gist { get; private set; }
         public IObservableUsersClient User { get; private set; }

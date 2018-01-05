@@ -1,7 +1,5 @@
-﻿#if NET_45
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-#endif
 
 namespace Octokit
 {
@@ -44,7 +42,7 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="number">The issue number</param>
-        Task<IReadOnlyList<TimelineEventInfo>> GetAllForIssue(int repositoryId, int number);
+        Task<IReadOnlyList<TimelineEventInfo>> GetAllForIssue(long repositoryId, int number);
 
         /// <summary>
         /// Gets all the various events that have occurred around an issue or pull request.
@@ -55,6 +53,6 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="number">The issue number</param>
         /// <param name="options">Options for changing the API response</param>
-        Task<IReadOnlyList<TimelineEventInfo>> GetAllForIssue(int repositoryId, int number, ApiOptions options);
+        Task<IReadOnlyList<TimelineEventInfo>> GetAllForIssue(long repositoryId, int number, ApiOptions options);
     }
 }

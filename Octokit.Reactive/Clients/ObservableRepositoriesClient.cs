@@ -36,6 +36,8 @@ namespace Octokit.Reactive
             Merging = new ObservableMergingClient(client);
             Page = new ObservableRepositoryPagesClient(client);
             Invitation = new ObservableRepositoryInvitationsClient(client);
+            Traffic = new ObservableRepositoryTrafficClient(client);
+            Project = new ObservableProjectsClient(client);
         }
 
         /// <summary>
@@ -89,7 +91,7 @@ namespace Octokit.Reactive
         /// <param name="repositoryId">The Id of the repository</param>
         /// <remarks>Deleting a repository requires admin access. If OAuth is used, the `delete_repo` scope is required.</remarks>
         /// <returns>An <see cref="IObservable{Unit}"/> for the operation</returns>
-        public IObservable<Unit> Delete(int repositoryId)
+        public IObservable<Unit> Delete(long repositoryId)
         {
             return _client.Delete(repositoryId).ToObservable();
         }
@@ -113,7 +115,7 @@ namespace Octokit.Reactive
         /// </summary>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <returns>A <see cref="Repository"/></returns>
-        public IObservable<Repository> Get(int repositoryId)
+        public IObservable<Repository> Get(long repositoryId)
         {
             return _client.Get(repositoryId).ToObservable();
         }
@@ -322,79 +324,6 @@ namespace Octokit.Reactive
         public IObservableMergingClient Merging { get; private set; }
 
         /// <summary>
-        /// Gets all the branches for the specified repository.
-        /// </summary>
-        /// <remarks>
-        /// See the <a href="https://developer.github.com/v3/repos/branches/#list-branches">API documentation</a> for more details
-        /// </remarks>
-        /// <param name="owner">The owner of the repository</param>
-        /// <param name="name">The name of the repository</param>
-        /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
-        /// <returns>All <see cref="T:Octokit.Branch"/>es of the repository</returns>
-        [Obsolete("Please use ObservableRepositoriesClient.Branch.GetAll() instead.  This method will be removed in a future version")]
-        public IObservable<Branch> GetAllBranches(string owner, string name)
-        {
-            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
-            Ensure.ArgumentNotNullOrEmptyString(name, "name");
-
-            return Branch.GetAll(owner, name, ApiOptions.None);
-        }
-
-        /// <summary>
-        /// Gets all the branches for the specified repository.
-        /// </summary>
-        /// <remarks>
-        /// See the <a href="https://developer.github.com/v3/repos/branches/#list-branches">API documentation</a> for more details
-        /// </remarks>
-        /// <param name="repositoryId">The Id of the repository</param>
-        /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
-        /// <returns>All <see cref="T:Octokit.Branch"/>es of the repository</returns>
-        [Obsolete("Please use ObservableRepositoriesClient.Branch.GetAll() instead.  This method will be removed in a future version")]
-        public IObservable<Branch> GetAllBranches(int repositoryId)
-        {
-            return Branch.GetAll(repositoryId, ApiOptions.None);
-        }
-
-        /// <summary>
-        /// Gets all the branches for the specified repository.
-        /// </summary>
-        /// <remarks>
-        /// See the <a href="https://developer.github.com/v3/repos/branches/#list-branches">API documentation</a> for more details
-        /// </remarks>
-        /// <param name="owner">The owner of the repository</param>
-        /// <param name="name">The name of the repository</param>
-        /// <param name="options">Options for changing the API response</param>
-        /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
-        /// <returns>All <see cref="T:Octokit.Branch"/>es of the repository</returns>
-        [Obsolete("Please use ObservableRepositoriesClient.Branch.GetAll() instead.  This method will be removed in a future version")]
-        public IObservable<Branch> GetAllBranches(string owner, string name, ApiOptions options)
-        {
-            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
-            Ensure.ArgumentNotNullOrEmptyString(name, "name");
-            Ensure.ArgumentNotNull(options, "options");
-
-            return Branch.GetAll(owner, name, options);
-        }
-
-        /// <summary>
-        /// Gets all the branches for the specified repository.
-        /// </summary>
-        /// <remarks>
-        /// See the <a href="https://developer.github.com/v3/repos/branches/#list-branches">API documentation</a> for more details
-        /// </remarks>
-        /// <param name="repositoryId">The Id of the repository</param>
-        /// <param name="options">Options for changing the API response</param>
-        /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
-        /// <returns>All <see cref="T:Octokit.Branch"/>es of the repository</returns>
-        [Obsolete("Please use ObservableRepositoriesClient.Branch.GetAll() instead.  This method will be removed in a future version")]
-        public IObservable<Branch> GetAllBranches(int repositoryId, ApiOptions options)
-        {
-            Ensure.ArgumentNotNull(options, "options");
-
-            return Branch.GetAll(repositoryId, options);
-        }
-
-        /// <summary>
         /// Gets all contributors for the specified repository. Does not include anonymous contributors.
         /// </summary>
         /// <remarks>
@@ -419,7 +348,7 @@ namespace Octokit.Reactive
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <returns>All contributors of the repository.</returns>
-        public IObservable<RepositoryContributor> GetAllContributors(int repositoryId)
+        public IObservable<RepositoryContributor> GetAllContributors(long repositoryId)
         {
             return GetAllContributors(repositoryId, ApiOptions.None);
         }
@@ -452,7 +381,7 @@ namespace Octokit.Reactive
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="options">Options for changing the API response</param>
         /// <returns>All contributors of the repository.</returns>
-        public IObservable<RepositoryContributor> GetAllContributors(int repositoryId, ApiOptions options)
+        public IObservable<RepositoryContributor> GetAllContributors(long repositoryId, ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, "options");
 
@@ -486,7 +415,7 @@ namespace Octokit.Reactive
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="includeAnonymous">True if anonymous contributors should be included in result; Otherwise false</param>
         /// <returns>All contributors of the repository.</returns>
-        public IObservable<RepositoryContributor> GetAllContributors(int repositoryId, bool includeAnonymous)
+        public IObservable<RepositoryContributor> GetAllContributors(long repositoryId, bool includeAnonymous)
         {
             return GetAllContributors(repositoryId, includeAnonymous, ApiOptions.None);
         }
@@ -526,7 +455,7 @@ namespace Octokit.Reactive
         /// <param name="includeAnonymous">True if anonymous contributors should be included in result; Otherwise false</param>
         /// <param name="options">Options for changing the API response</param>
         /// <returns>All contributors of the repository.</returns>
-        public IObservable<RepositoryContributor> GetAllContributors(int repositoryId, bool includeAnonymous, ApiOptions options)
+        public IObservable<RepositoryContributor> GetAllContributors(long repositoryId, bool includeAnonymous, ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, "options");
 
@@ -566,7 +495,7 @@ namespace Octokit.Reactive
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <returns>All languages used in the repository and the number of bytes of each language.</returns>
-        public IObservable<RepositoryLanguage> GetAllLanguages(int repositoryId)
+        public IObservable<RepositoryLanguage> GetAllLanguages(long repositoryId)
         {
             var endpoint = ApiUrls.RepositoryLanguages(repositoryId);
             return _connection
@@ -599,7 +528,7 @@ namespace Octokit.Reactive
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <returns>All <see cref="T:Octokit.Team"/>s associated with the repository</returns>
-        public IObservable<Team> GetAllTeams(int repositoryId)
+        public IObservable<Team> GetAllTeams(long repositoryId)
         {
             return GetAllTeams(repositoryId, ApiOptions.None);
         }
@@ -632,7 +561,7 @@ namespace Octokit.Reactive
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="options">Options for changing the API response</param>
         /// <returns>All <see cref="T:Octokit.Team"/>s associated with the repository</returns>
-        public IObservable<Team> GetAllTeams(int repositoryId, ApiOptions options)
+        public IObservable<Team> GetAllTeams(long repositoryId, ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, "options");
 
@@ -664,7 +593,7 @@ namespace Octokit.Reactive
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <returns>All of the repositories tags.</returns>
-        public IObservable<RepositoryTag> GetAllTags(int repositoryId)
+        public IObservable<RepositoryTag> GetAllTags(long repositoryId)
         {
             return GetAllTags(repositoryId, ApiOptions.None);
         }
@@ -697,48 +626,11 @@ namespace Octokit.Reactive
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="options">Options for changing the API response</param>
         /// <returns>All of the repositories tags.</returns>
-        public IObservable<RepositoryTag> GetAllTags(int repositoryId, ApiOptions options)
+        public IObservable<RepositoryTag> GetAllTags(long repositoryId, ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, "options");
 
             return _connection.GetAndFlattenAllPages<RepositoryTag>(ApiUrls.RepositoryTags(repositoryId), options);
-        }
-
-        /// <summary>
-        /// Gets the specified branch.
-        /// </summary>
-        /// <remarks>
-        /// See the <a href="https://developer.github.com/v3/repos/branches/#get-branch">API documentation</a> for more details
-        /// </remarks>
-        /// <param name="owner">The owner of the repository</param>
-        /// <param name="name">The name of the repository</param>
-        /// <param name="branchName">The name of the branch</param>
-        /// <returns>The specified <see cref="T:Octokit.Branch"/></returns>
-        [Obsolete("Please use ObservableRepositoriesClient.Branch.Get() instead.  This method will be removed in a future version")]
-        public IObservable<Branch> GetBranch(string owner, string name, string branchName)
-        {
-            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
-            Ensure.ArgumentNotNullOrEmptyString(name, "name");
-            Ensure.ArgumentNotNullOrEmptyString(branchName, "branchName");
-
-            return Branch.Get(owner, name, branchName);
-        }
-
-        /// <summary>
-        /// Gets the specified branch.
-        /// </summary>
-        /// <remarks>
-        /// See the <a href="https://developer.github.com/v3/repos/branches/#get-branch">API documentation</a> for more details
-        /// </remarks>
-        /// <param name="repositoryId">The Id of the repository</param>
-        /// <param name="branchName">The name of the branch</param>
-        /// <returns>The specified <see cref="T:Octokit.Branch"/></returns>
-        [Obsolete("Please use ObservableRepositoriesClient.Branch.Get() instead.  This method will be removed in a future version")]
-        public IObservable<Branch> GetBranch(int repositoryId, string branchName)
-        {
-            Ensure.ArgumentNotNullOrEmptyString(branchName, "branchName");
-
-            return Branch.Get(repositoryId, branchName);
         }
 
         /// <summary>
@@ -763,46 +655,11 @@ namespace Octokit.Reactive
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="update">New values to update the repository with</param>
         /// <returns>The updated <see cref="T:Octokit.Repository"/></returns>
-        public IObservable<Repository> Edit(int repositoryId, RepositoryUpdate update)
+        public IObservable<Repository> Edit(long repositoryId, RepositoryUpdate update)
         {
             Ensure.ArgumentNotNull(update, "update");
 
             return _client.Edit(repositoryId, update).ToObservable();
-        }
-
-        /// <summary>
-        /// Edit the specified branch with the values given in <paramref name="update"/>
-        /// </summary>
-        /// <param name="owner">The owner of the repository</param>
-        /// <param name="name">The name of the repository</param>
-        /// <param name="branch">The name of the branch</param>
-        /// <param name="update">New values to update the branch with</param>
-        /// <returns>The updated <see cref="T:Octokit.Branch"/></returns>
-        [Obsolete("This existing implementation will cease to work when the Branch Protection API preview period ends.  Please use the ObservableRepositoryBranchesClient methods instead.")]
-        public IObservable<Branch> EditBranch(string owner, string name, string branch, BranchUpdate update)
-        {
-            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
-            Ensure.ArgumentNotNullOrEmptyString(name, "name");
-            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
-            Ensure.ArgumentNotNull(update, "update");
-
-            return Branch.Edit(owner, name, branch, update);
-        }
-
-        /// <summary>
-        /// Edit the specified branch with the values given in <paramref name="update"/>
-        /// </summary>
-        /// <param name="repositoryId">The Id of the repository</param>
-        /// <param name="branch">The name of the branch</param>
-        /// <param name="update">New values to update the branch with</param>
-        /// <returns>The updated <see cref="T:Octokit.Branch"/></returns>
-        [Obsolete("This existing implementation will cease to work when the Branch Protection API preview period ends.  Please use the ObservableRepositoryBranchesClient methods instead.")]
-        public IObservable<Branch> EditBranch(int repositoryId, string branch, BranchUpdate update)
-        {
-            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
-            Ensure.ArgumentNotNull(update, "update");
-
-            return Branch.Edit(repositoryId, branch, update);
         }
 
         /// <summary>
@@ -880,6 +737,22 @@ namespace Octokit.Reactive
         /// <remarks>
         /// See the <a href="https://developer.github.com/v3/repos/invitations/">Repository Invitations API documentation</a> for more information.
         /// </remarks>
-        public IObservableRepositoryInvitationsClient Invitation { get; private set; }        
+        public IObservableRepositoryInvitationsClient Invitation { get; private set; }
+
+        /// <summary>
+        /// Access GitHub's Repository Traffic API
+        /// </summary>
+        /// <remarks>
+        /// Refer to the API documentation for more information: https://developer.github.com/v3/repos/traffic/
+        /// </remarks>
+        public IObservableRepositoryTrafficClient Traffic { get; private set; }
+
+        /// <summary>
+        /// Access GitHub's Repository Projects API
+        /// </summary>
+        /// <remarks>
+        /// Refer to the API documentation for more information: https://developer.github.com/v3/repos/projects/
+        /// </remarks>
+        public IObservableProjectsClient Project { get; private set; }
     }
 }

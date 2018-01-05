@@ -3,9 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Diagnostics.CodeAnalysis;
-#if NET_45
 using System.Collections.Generic;
-#endif
 
 namespace Octokit
 {
@@ -39,6 +37,8 @@ namespace Octokit
             Page = new RepositoryPagesClient(apiConnection);
             Invitation = new RepositoryInvitationsClient(apiConnection);
             Branch = new RepositoryBranchesClient(apiConnection);
+            Traffic = new RepositoryTrafficClient(apiConnection);
+            Project = new ProjectsClient(apiConnection);
         }
 
         /// <summary>
@@ -158,25 +158,9 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
-        public Task Delete(int repositoryId)
+        public Task Delete(long repositoryId)
         {
             return ApiConnection.Delete(ApiUrls.Repository(repositoryId));
-        }
-
-        /// <summary>
-        /// Gets the specified branch.
-        /// </summary>
-        /// <remarks>
-        /// See the <a href="https://developer.github.com/v3/repos/branches/#get-branch">API documentation</a> for more details
-        /// </remarks>
-        /// <param name="repositoryId">The Id of the repository</param>
-        /// <param name="branchName">The name of the branch</param>
-        [Obsolete("Please use RepositoriesClient.Branch.Get() instead.  This method will be removed in a future version")]
-        public Task<Branch> GetBranch(int repositoryId, string branchName)
-        {
-            Ensure.ArgumentNotNullOrEmptyString(branchName, "branchName");
-
-            return Branch.Get(repositoryId, branchName);
         }
 
         /// <summary>
@@ -191,8 +175,9 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
             Ensure.ArgumentNotNullOrEmptyString(name, "name");
             Ensure.ArgumentNotNull(update, "update");
+            Ensure.ArgumentNotNull(update.Name, "update.Name");
 
-            return ApiConnection.Patch<Repository>(ApiUrls.Repository(owner, name), update);
+            return ApiConnection.Patch<Repository>(ApiUrls.Repository(owner, name), update, AcceptHeaders.SquashCommitPreview);
         }
 
         /// <summary>
@@ -201,46 +186,11 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="update">New values to update the repository with</param>
         /// <returns>The updated <see cref="T:Octokit.Repository"/></returns>
-        public Task<Repository> Edit(int repositoryId, RepositoryUpdate update)
+        public Task<Repository> Edit(long repositoryId, RepositoryUpdate update)
         {
             Ensure.ArgumentNotNull(update, "update");
 
-            return ApiConnection.Patch<Repository>(ApiUrls.Repository(repositoryId), update);
-        }
-
-        /// <summary>
-        /// Edit the specified branch with the values given in <paramref name="update"/>
-        /// </summary>
-        /// <param name="owner">The owner of the repository</param>
-        /// <param name="name">The name of the repository</param>
-        /// <param name="branch">The name of the branch</param>
-        /// <param name="update">New values to update the branch with</param>
-        /// <returns>The updated <see cref="T:Octokit.Branch"/></returns>
-        [Obsolete("This existing implementation will cease to work when the Branch Protection API preview period ends.  Please use the RepositoryBranchesClient methods instead.")]
-        public Task<Branch> EditBranch(string owner, string name, string branch, BranchUpdate update)
-        {
-            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
-            Ensure.ArgumentNotNullOrEmptyString(name, "name");
-            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
-            Ensure.ArgumentNotNull(update, "update");
-
-            return Branch.Edit(owner, name, branch, update);
-        }
-
-        /// <summary>
-        /// Edit the specified branch with the values given in <paramref name="update"/>
-        /// </summary>
-        /// <param name="repositoryId">The Id of the repository</param>
-        /// <param name="branch">The name of the branch</param>
-        /// <param name="update">New values to update the branch with</param>
-        /// <returns>The updated <see cref="T:Octokit.Branch"/></returns>
-        [Obsolete("This existing implementation will cease to work when the Branch Protection API preview period ends.  Please use the RepositoryBranchesClient methods instead.")]
-        public Task<Branch> EditBranch(int repositoryId, string branch, BranchUpdate update)
-        {
-            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
-            Ensure.ArgumentNotNull(update, "update");
-
-            return Branch.Edit(repositoryId, branch, update);
+            return ApiConnection.Patch<Repository>(ApiUrls.Repository(repositoryId), update, AcceptHeaders.SquashCommitPreview);
         }
 
         /// <summary>
@@ -258,7 +208,7 @@ namespace Octokit
             Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
             Ensure.ArgumentNotNullOrEmptyString(name, "name");
 
-            return ApiConnection.Get<Repository>(ApiUrls.Repository(owner, name));
+            return ApiConnection.Get<Repository>(ApiUrls.Repository(owner, name), null, AcceptHeaders.SquashCommitPreview);
         }
 
         /// <summary>
@@ -270,9 +220,9 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <exception cref="ApiException">Thrown when a general API error occurs.</exception>
         /// <returns>A <see cref="Repository"/></returns>
-        public Task<Repository> Get(int repositoryId)
+        public Task<Repository> Get(long repositoryId)
         {
-            return ApiConnection.Get<Repository>(ApiUrls.Repository(repositoryId));
+            return ApiConnection.Get<Repository>(ApiUrls.Repository(repositoryId), null, AcceptHeaders.SquashCommitPreview);
         }
 
         /// <summary>
@@ -480,7 +430,7 @@ namespace Octokit
         /// Client for GitHub's Repository Deployments API
         /// </summary>
         /// <remarks>
-        /// See the <a href="http://developer.github.com/v3/repos/deployment/">Collaborators API documentation</a> for more details
+        /// See the <a href="https://developer.github.com/v3/repos/deployments/">Deployments API documentation</a> for more details
         /// </remarks>
         public IDeploymentsClient Deployment { get; private set; }
 
@@ -549,71 +499,6 @@ namespace Octokit
         public IRepositoryContentsClient Content { get; private set; }
 
         /// <summary>
-        /// Gets all the branches for the specified repository.
-        /// </summary>
-        /// <remarks>
-        /// See the <a href="https://developer.github.com/v3/repos/branches/#list-branches">API documentation</a> for more details
-        /// </remarks>
-        /// <param name="owner">The owner of the repository</param>
-        /// <param name="name">The name of the repository</param>
-        [Obsolete("Please use RepositoriesClient.Branch.GetAll() instead.  This method will be removed in a future version")]
-        public Task<IReadOnlyList<Branch>> GetAllBranches(string owner, string name)
-        {
-            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
-            Ensure.ArgumentNotNullOrEmptyString(name, "name");
-
-            return Branch.GetAll(owner, name);
-        }
-
-        /// <summary>
-        /// Gets all the branches for the specified repository.
-        /// </summary>
-        /// <remarks>
-        /// See the <a href="https://developer.github.com/v3/repos/branches/#list-branches">API documentation</a> for more details
-        /// </remarks>
-        /// <param name="repositoryId">The Id of the repository</param>
-        [Obsolete("Please use RepositoriesClient.Branch.GetAll() instead.  This method will be removed in a future version")]
-        public Task<IReadOnlyList<Branch>> GetAllBranches(int repositoryId)
-        {
-            return Branch.GetAll(repositoryId);
-        }
-
-        /// <summary>
-        /// Gets all the branches for the specified repository.
-        /// </summary>
-        /// <remarks>
-        /// See the <a href="https://developer.github.com/v3/repos/branches/#list-branches">API documentation</a> for more details
-        /// </remarks>
-        /// <param name="owner">The owner of the repository</param>
-        /// <param name="name">The name of the repository</param>
-        /// <param name="options">Options for changing the API response</param>
-        [Obsolete("Please use RepositoriesClient.Branch.GetAll() instead.  This method will be removed in a future version")]
-        public Task<IReadOnlyList<Branch>> GetAllBranches(string owner, string name, ApiOptions options)
-        {
-            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
-            Ensure.ArgumentNotNullOrEmptyString(name, "name");
-            Ensure.ArgumentNotNull(options, "options");
-
-            return Branch.GetAll(owner, name, options);
-        }
-
-        /// <summary>
-        /// Gets all the branches for the specified repository.
-        /// </summary>
-        /// <remarks>
-        /// See the <a href="https://developer.github.com/v3/repos/branches/#list-branches">API documentation</a> for more details
-        /// </remarks>
-        /// <param name="repositoryId">The Id of the repository</param>
-        /// <param name="options">Options for changing the API response</param>
-        [Obsolete("Please use RepositoriesClient.Branch.GetAll() instead.  This method will be removed in a future version")]
-        public Task<IReadOnlyList<Branch>> GetAllBranches(int repositoryId, ApiOptions options)
-        {
-            Ensure.ArgumentNotNull(options, "options");
-
-            return Branch.GetAll(repositoryId, options);
-        }
-
-        /// <summary>
         /// Gets all contributors for the specified repository. Does not include anonymous contributors.
         /// </summary>
         /// <remarks>
@@ -638,7 +523,7 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <returns>All contributors of the repository.</returns>
-        public Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(int repositoryId)
+        public Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(long repositoryId)
         {
             return GetAllContributors(repositoryId, false);
         }
@@ -671,7 +556,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="options">Options for changing the API response</param>
         /// <returns>All contributors of the repository.</returns>
-        public Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(int repositoryId, ApiOptions options)
+        public Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(long repositoryId, ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, "options");
 
@@ -705,7 +590,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="includeAnonymous">True if anonymous contributors should be included in result; Otherwise false</param>
         /// <returns>All contributors of the repository.</returns>
-        public Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(int repositoryId, bool includeAnonymous)
+        public Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(long repositoryId, bool includeAnonymous)
         {
             return GetAllContributors(repositoryId, includeAnonymous, ApiOptions.None);
         }
@@ -744,7 +629,7 @@ namespace Octokit
         /// <param name="includeAnonymous">True if anonymous contributors should be included in result; Otherwise false</param>
         /// <param name="options">Options for changing the API response</param>
         /// <returns>All contributors of the repository.</returns>
-        public Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(int repositoryId, bool includeAnonymous, ApiOptions options)
+        public Task<IReadOnlyList<RepositoryContributor>> GetAllContributors(long repositoryId, bool includeAnonymous, ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, "options");
 
@@ -784,7 +669,7 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <returns>All languages used in the repository and the number of bytes of each language.</returns>
-        public async Task<IReadOnlyList<RepositoryLanguage>> GetAllLanguages(int repositoryId)
+        public async Task<IReadOnlyList<RepositoryLanguage>> GetAllLanguages(long repositoryId)
         {
             var endpoint = ApiUrls.RepositoryLanguages(repositoryId);
             var data = await ApiConnection.Get<Dictionary<string, long>>(endpoint).ConfigureAwait(false);
@@ -818,7 +703,7 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <returns>All <see cref="T:Octokit.Team"/>s associated with the repository</returns>
-        public Task<IReadOnlyList<Team>> GetAllTeams(int repositoryId)
+        public Task<IReadOnlyList<Team>> GetAllTeams(long repositoryId)
         {
             return GetAllTeams(repositoryId, ApiOptions.None);
         }
@@ -851,7 +736,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="options">Options for changing the API response</param>
         /// <returns>All <see cref="T:Octokit.Team"/>s associated with the repository</returns>
-        public Task<IReadOnlyList<Team>> GetAllTeams(int repositoryId, ApiOptions options)
+        public Task<IReadOnlyList<Team>> GetAllTeams(long repositoryId, ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, "options");
 
@@ -883,7 +768,7 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <returns>All of the repositories tags.</returns>
-        public Task<IReadOnlyList<RepositoryTag>> GetAllTags(int repositoryId)
+        public Task<IReadOnlyList<RepositoryTag>> GetAllTags(long repositoryId)
         {
             return GetAllTags(repositoryId, ApiOptions.None);
         }
@@ -916,30 +801,11 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="options">Options for changing the API response</param>
         /// <returns>All of the repositories tags.</returns>
-        public Task<IReadOnlyList<RepositoryTag>> GetAllTags(int repositoryId, ApiOptions options)
+        public Task<IReadOnlyList<RepositoryTag>> GetAllTags(long repositoryId, ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, "options");
 
             return ApiConnection.GetAll<RepositoryTag>(ApiUrls.RepositoryTags(repositoryId), options);
-        }
-
-        /// <summary>
-        /// Gets the specified branch.
-        /// </summary>
-        /// <remarks>
-        /// See the <a href="https://developer.github.com/v3/repos/branches/#get-branch">API documentation</a> for more details
-        /// </remarks>
-        /// <param name="owner">The owner of the repository</param>
-        /// <param name="name">The name of the repository</param>
-        /// <param name="branchName">The name of the branch</param>
-        [Obsolete("Please use RepositoriesClient.Branch.Get() instead.  This method will be removed in a future version")]
-        public Task<Branch> GetBranch(string owner, string name, string branchName)
-        {
-            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
-            Ensure.ArgumentNotNullOrEmptyString(name, "name");
-            Ensure.ArgumentNotNullOrEmptyString(branchName, "branchName");
-
-            return Branch.Get(owner, name, branchName);
         }
 
         /// <summary>
@@ -957,5 +823,21 @@ namespace Octokit
         /// See the <a href="https://developer.github.com/v3/repos/invitations/">Repository Invitations API documentation</a> for more information.
         /// </remarks>
         public IRepositoryInvitationsClient Invitation { get; private set; }
+
+        /// <summary>
+        /// Access GitHub's Repository Traffic API
+        /// </summary>
+        /// <remarks>
+        /// Refer to the API documentation for more information: https://developer.github.com/v3/repos/traffic/
+        /// </remarks>
+        public IRepositoryTrafficClient Traffic { get; private set; }
+
+        /// <summary>
+        /// Access GitHub's Repository Projects API
+        /// </summary>
+        /// <remarks>
+        /// Refer to the API documentation for more information: https://developer.github.com/v3/repos/projects/
+        /// </remarks>
+        public IProjectsClient Project { get; private set; }
     }
 }

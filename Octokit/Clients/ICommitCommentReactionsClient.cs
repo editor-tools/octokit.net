@@ -30,7 +30,7 @@ namespace Octokit
         /// <param name="number">The comment id</param>
         /// <param name="reaction">The reaction to create</param>
         /// <returns></returns>
-        Task<Reaction> Create(int repositoryId, int number, NewReaction reaction);
+        Task<Reaction> Create(long repositoryId, int number, NewReaction reaction);
 
         /// <summary>
         /// Get all reactions for a specified Commit Comment
@@ -40,6 +40,7 @@ namespace Octokit
         /// <param name="name">The name of the repository</param>
         /// <param name="number">The comment id</param>        
         /// <returns></returns>
+        [ExcludeFromPaginationApiOptionsConventionTest("TODO: Implement pagination for this method")]
         Task<IReadOnlyList<Reaction>> GetAll(string owner, string name, int number);
 
         /// <summary>
@@ -49,6 +50,7 @@ namespace Octokit
         /// <param name="repositoryId">The owner of the repository</param>
         /// <param name="number">The comment id</param>        
         /// <returns></returns>
-        Task<IReadOnlyList<Reaction>> GetAll(int repositoryId, int number);
+        [ExcludeFromPaginationApiOptionsConventionTest("TODO: Implement pagination for this method")]
+        Task<IReadOnlyList<Reaction>> GetAll(long repositoryId, int number);
     }
 }

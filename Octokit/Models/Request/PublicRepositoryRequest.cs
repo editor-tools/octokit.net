@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 
 namespace Octokit
@@ -12,11 +13,9 @@ namespace Octokit
         /// <summary>
         /// Initializes a new instance of the <see cref="PublicRepositoryRequest"/> class.
         /// </summary>
-        /// <param name="since">The integer Id of the last Repository that you’ve seen.</param>
-        public PublicRepositoryRequest(int since)
+        /// <param name="since">The Id of the last Repository that you’ve seen.</param>
+        public PublicRepositoryRequest(long since)
         {
-            Ensure.ArgumentNotNull(since, "since");
-
             Since = since;
         }
 

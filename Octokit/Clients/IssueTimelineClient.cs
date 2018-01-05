@@ -1,7 +1,5 @@
-﻿#if NET_45
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-#endif
 
 namespace Octokit
 {
@@ -11,7 +9,7 @@ namespace Octokit
     /// <remarks>
     /// See the <a href="https://developer.github.com/v3/issues/timeline/">Issue Timeline API documentation</a> for more information.
     /// </remarks>
-    public class IssueTimelineClient: ApiClient, IIssueTimelineClient
+    public class IssueTimelineClient : ApiClient, IIssueTimelineClient
     {
         public IssueTimelineClient(IApiConnection apiConnection) : base(apiConnection)
         {
@@ -61,7 +59,7 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="number">The issue number</param>
-        public Task<IReadOnlyList<TimelineEventInfo>> GetAllForIssue(int repositoryId, int number)
+        public Task<IReadOnlyList<TimelineEventInfo>> GetAllForIssue(long repositoryId, int number)
         {
             return GetAllForIssue(repositoryId, number, ApiOptions.None);
         }
@@ -75,7 +73,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="number">The issue number</param>
         /// <param name="options">Options for changing the API response</param>
-        public Task<IReadOnlyList<TimelineEventInfo>> GetAllForIssue(int repositoryId, int number, ApiOptions options)
+        public Task<IReadOnlyList<TimelineEventInfo>> GetAllForIssue(long repositoryId, int number, ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, "options");
 
