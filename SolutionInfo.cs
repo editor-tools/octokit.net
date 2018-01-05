@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProductAttribute("Octokit")]
 [assembly: AssemblyVersionAttribute("0.28.0")]
 [assembly: AssemblyFileVersionAttribute("0.28.0")]
+[assembly: AssemblyInformationalVersionAttribute("0.28.0")]
 [assembly: ComVisibleAttribute(false)]
 namespace System {
     internal static class AssemblyVersionInformation {
