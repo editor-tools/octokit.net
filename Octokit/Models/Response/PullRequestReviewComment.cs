@@ -44,6 +44,11 @@ namespace Octokit
         public int Id { get; protected set; }
 
         /// <summary>
+        /// The Id of the related pull request reivew.
+        /// </summary>
+        public long PullRequestReviewId { get; protected set; }
+
+        /// <summary>
         /// The diff hunk the comment is about.
         /// </summary>
         public string DiffHunk { get; protected set; }
