@@ -32,6 +32,11 @@ namespace Octokit
         public long Id { get; protected set; }
 
         /// <summary>
+        /// The GraphQL node ID.
+        /// </summary>
+        public string NodeId { get; protected set; }
+
+        /// <summary>
         /// The state of the review
         /// </summary>
         public StringEnum<PullRequestReviewState> State { get; protected set; }
