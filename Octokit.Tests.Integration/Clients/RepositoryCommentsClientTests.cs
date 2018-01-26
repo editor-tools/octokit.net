@@ -15,7 +15,7 @@ public class RepositoryCommentsClientTests
         readonly IRepositoryCommentsClient _fixture;
         const string owner = "octocat";
         const string name = "Hello-World";
-        const int repositoryId = 1296269;
+        const long repositoryId = 1296269;
 
         public TheGetMethod()
         {
@@ -71,7 +71,7 @@ public class RepositoryCommentsClientTests
         readonly IRepositoryCommentsClient _fixture;
         const string owner = "octocat";
         const string name = "Hello-World";
-        const int repositoryId = 1296269;
+        const long repositoryId = 1296269;
 
         public TheGetAllForRepositoryMethod()
         {
@@ -246,7 +246,7 @@ public class RepositoryCommentsClientTests
         readonly IRepositoryCommentsClient _fixture;
         const string owner = "octocat";
         const string name = "Hello-World";
-        const int repositoryId = 1296269;
+        const long repositoryId = 1296269;
 
         public TheGetAllForCommitMethod()
         {
@@ -499,7 +499,7 @@ public class RepositoryCommentsClientTests
             {
                 var newReaction = new NewReaction(reactionType);
 
-                var reaction = await _github.Reaction.Issue.Create(_context.RepositoryOwner, _context.RepositoryName, result.Id, newReaction);
+                var reaction = await _github.Reaction.CommitComment.Create(_context.RepositoryOwner, _context.RepositoryName, result.Id, newReaction);
 
                 Assert.IsType<Reaction>(reaction);
                 Assert.Equal(reactionType, reaction.Content);

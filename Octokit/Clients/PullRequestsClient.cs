@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -14,13 +15,19 @@ namespace Octokit
     {
         public PullRequestsClient(IApiConnection apiConnection) : base(apiConnection)
         {
-            Comment = new PullRequestReviewCommentsClient(apiConnection);
+            ReviewComment = new PullRequestReviewCommentsClient(apiConnection);
         }
 
         /// <summary>
-        /// Client for managing comments.
+        /// Client for managing review comments.
         /// </summary>
-        public IPullRequestReviewCommentsClient Comment { get; private set; }
+        [Obsolete("Please use PullRequestsClient.ReviewComment instead. This method will be removed in a future version")]
+        public IPullRequestReviewCommentsClient Comment { get { return this.ReviewComment; } }
+
+        /// <summary>
+        /// Client for managing review comments.
+        /// </summary>
+        public IPullRequestReviewCommentsClient ReviewComment { get; set; }
 
         /// <summary>
         /// Get a pull request by number.
@@ -42,7 +49,7 @@ namespace Octokit
         /// <remarks>
         /// http://developer.github.com/v3/pulls/#get-a-single-pull-request
         /// </remarks>
-        public Task<PullRequest> Get(int repositoryId, int number)
+        public Task<PullRequest> Get(long repositoryId, int number)
         {
             return ApiConnection.Get<PullRequest>(ApiUrls.PullRequest(repositoryId, number));
         }
@@ -70,7 +77,7 @@ namespace Octokit
         /// http://developer.github.com/v3/pulls/#list-pull-requests
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
-        public Task<IReadOnlyList<PullRequest>> GetAllForRepository(int repositoryId)
+        public Task<IReadOnlyList<PullRequest>> GetAllForRepository(long repositoryId)
         {
             return GetAllForRepository(repositoryId, new PullRequestRequest(), ApiOptions.None);
         }
@@ -101,7 +108,7 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="options">Options for changing the API response</param>
-        public Task<IReadOnlyList<PullRequest>> GetAllForRepository(int repositoryId, ApiOptions options)
+        public Task<IReadOnlyList<PullRequest>> GetAllForRepository(long repositoryId, ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, "options");
 
@@ -134,7 +141,7 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="request">Used to filter and sort the list of pull requests returned</param>
-        public Task<IReadOnlyList<PullRequest>> GetAllForRepository(int repositoryId, PullRequestRequest request)
+        public Task<IReadOnlyList<PullRequest>> GetAllForRepository(long repositoryId, PullRequestRequest request)
         {
             Ensure.ArgumentNotNull(request, "request");
 
@@ -171,7 +178,7 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="request">Used to filter and sort the list of pull requests returned</param>
         /// <param name="options">Options for changing the API response</param>
-        public Task<IReadOnlyList<PullRequest>> GetAllForRepository(int repositoryId, PullRequestRequest request, ApiOptions options)
+        public Task<IReadOnlyList<PullRequest>> GetAllForRepository(long repositoryId, PullRequestRequest request, ApiOptions options)
         {
             Ensure.ArgumentNotNull(request, "request");
             Ensure.ArgumentNotNull(options, "options");
@@ -202,7 +209,7 @@ namespace Octokit
         /// <remarks>http://developer.github.com/v3/pulls/#create-a-pull-request</remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="newPullRequest">A <see cref="NewPullRequest"/> instance describing the new PullRequest to create</param>
-        public Task<PullRequest> Create(int repositoryId, NewPullRequest newPullRequest)
+        public Task<PullRequest> Create(long repositoryId, NewPullRequest newPullRequest)
         {
             Ensure.ArgumentNotNull(newPullRequest, "newPullRequest");
 
@@ -235,7 +242,7 @@ namespace Octokit
         /// <param name="number">The PullRequest number</param>
         /// <param name="pullRequestUpdate">An <see cref="PullRequestUpdate"/> instance describing the changes to make to the PullRequest
         /// </param>
-        public Task<PullRequest> Update(int repositoryId, int number, PullRequestUpdate pullRequestUpdate)
+        public Task<PullRequest> Update(long repositoryId, int number, PullRequestUpdate pullRequestUpdate)
         {
             Ensure.ArgumentNotNull(pullRequestUpdate, "pullRequestUpdate");
 
@@ -259,8 +266,7 @@ namespace Octokit
             try
             {
                 var endpoint = ApiUrls.MergePullRequest(owner, name, number);
-                return await ApiConnection.Put<PullRequestMerge>(endpoint, mergePullRequest, null,
-                    AcceptHeaders.SquashCommitPreview).ConfigureAwait(false);
+                return await ApiConnection.Put<PullRequestMerge>(endpoint, mergePullRequest, null, AcceptHeaders.SquashCommitPreview).ConfigureAwait(false);
             }
             catch (ApiException ex)
             {
@@ -285,15 +291,14 @@ namespace Octokit
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="number">The pull request number</param>
         /// <param name="mergePullRequest">A <see cref="MergePullRequest"/> instance describing a pull request merge</param>
-        public async Task<PullRequestMerge> Merge(int repositoryId, int number, MergePullRequest mergePullRequest)
+        public async Task<PullRequestMerge> Merge(long repositoryId, int number, MergePullRequest mergePullRequest)
         {
             Ensure.ArgumentNotNull(mergePullRequest, "mergePullRequest");
 
             try
             {
                 var endpoint = ApiUrls.MergePullRequest(repositoryId, number);
-                return await ApiConnection.Put<PullRequestMerge>(endpoint, mergePullRequest, null,
-                    AcceptHeaders.SquashCommitPreview).ConfigureAwait(false);
+                return await ApiConnection.Put<PullRequestMerge>(endpoint, mergePullRequest, null, AcceptHeaders.SquashCommitPreview).ConfigureAwait(false);
             }
             catch (ApiException ex)
             {
@@ -341,7 +346,7 @@ namespace Octokit
         /// <remarks>http://developer.github.com/v3/pulls/#get-if-a-pull-request-has-been-merged</remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="number">The pull request number</param>
-        public async Task<bool> Merged(int repositoryId, int number)
+        public async Task<bool> Merged(long repositoryId, int number)
         {
             try
             {
@@ -376,7 +381,7 @@ namespace Octokit
         /// <remarks>http://developer.github.com/v3/pulls/#list-commits-on-a-pull-request</remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="number">The pull request number</param>
-        public Task<IReadOnlyList<PullRequestCommit>> Commits(int repositoryId, int number)
+        public Task<IReadOnlyList<PullRequestCommit>> Commits(long repositoryId, int number)
         {
             return ApiConnection.GetAll<PullRequestCommit>(ApiUrls.PullRequestCommits(repositoryId, number));
         }
@@ -402,7 +407,7 @@ namespace Octokit
         /// <remarks>https://developer.github.com/v3/pulls/#list-pull-requests-files</remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="number">The pull request number</param>
-        public Task<IReadOnlyList<PullRequestFile>> Files(int repositoryId, int number)
+        public Task<IReadOnlyList<PullRequestFile>> Files(long repositoryId, int number)
         {
             return ApiConnection.GetAll<PullRequestFile>(ApiUrls.PullRequestFiles(repositoryId, number));
         }

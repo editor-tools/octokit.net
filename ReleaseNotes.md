@@ -1,3 +1,79 @@
+### New in 0.24.0 (released 17/1/2017)
+
+**Features/Enhancements**
+
+ - Add `GetAll` method to `OrganizationsClient` - [#1469](https://github.com/octokit/octokit.net/pull/1469) via [malamour-work](https://github.com/malamour-work)
+ - Add missing fields to `Repository` class - `HasPages`, `SubscribersCount`, `Size` - [#1473](https://github.com/octokit/octokit.net/pull/1473) via [ryangribble](https://github.com/ryangribble)
+ - Allow base64 content for create/update file - [#1488](https://github.com/octokit/octokit.net/pull/1488) via [laedit](https://github.com/laedit)
+ - Add `HtmlUrl` field to `Milestone` class - [#1489](https://github.com/octokit/octokit.net/pull/1489) via [StanleyGoldman](https://github.com/StanleyGoldman)
+ - Add support for passing sort options to `IssueCommentsClient.GetAllForRepository()` - [#1501](https://github.com/octokit/octokit.net/pull/1501) via [pjc0247](https://github.com/pjc0247)
+ - Rename `PullRequest.Comment` to `PullRequest.ReviewComment` for better accuracy - [#1520](https://github.com/octokit/octokit.net/pull/1520) via [bmeverett](https://github.com/bmeverett)
+ - Introduce `AbuseException` - [#1528](https://github.com/octokit/octokit.net/pull/1528) via [SeanKilleen](https://github.com/SeanKilleen)
+ - Add `Id` field to `PullRequest` class - [#1537](https://github.com/octokit/octokit.net/pull/1537) via [YunLi1988](https://github.com/YunLi1988)
+ - Unparseable `ApiErrors` should now fall back to better default error messages - [#1540](https://github.com/octokit/octokit.net/pull/1540) via [SeanKilleen](https://github.com/SeanKilleen)
+
+**Fixes**
+
+ - Fix errors in `ObservableEventsClient` caused by incorrect return types - [#1490](https://github.com/octokit/octokit.net/pull/1490) via [StanleyGoldman](https://github.com/StanleyGoldman)
+ - Add missing `SecurityCritical` attribute on `GetObjectData()` overrides - [#1493](https://github.com/octokit/octokit.net/pull/1493) via [M-Zuber](https://github.com/M-Zuber)
+ - Fix exceptions in Events API by adding missing event types to `EventInfo` enumeration - [#1536](https://github.com/octokit/octokit.net/pull/1536) via [lynnfaraday](https://github.com/lynnfaraday)
+ - Add new AccountType "Bot" to prevent deserialization errors - [#1541](https://github.com/octokit/octokit.net/pull/1541) via [ryangribble](https://github.com/ryangribble)
+
+**Documentation Updates**
+
+ - Clarify `ApiInfo` rate limiting usage in docs - [#1524](https://github.com/octokit/octokit.net/pull/1524) via [SeanKilleen](https://github.com/SeanKilleen)
+ - Clarify label coloring usage in docs - [#1530](https://github.com/octokit/octokit.net/pull/1530) via [SeanKilleen](https://github.com/SeanKilleen)
+
+**Breaking Changes**
+
+ - Creating and Editing Issues (and PullRequests) using `NewIssue` and `IssueUpdate` requests 
+should now use the `Assignees` collection rather than the now deprecated 'Assignee` field. 
+Both fields can't be specified on the same request, so any code still using `Assignee` will 
+need to explicitly set `Assignees` to `null` to avoid Api validation errors.
+
+ - `OrganizationsClient.GetAll(string user)` has been marked obsolete in favour of 
+`OrganizationsClient.GetAllForUser(string user)`
+
+ - `PullRequest.Comment` has been marked obsolete in favour of `PullRequest.ReviewComment`
+
+- Several `EventsClient` methods previously returned the incorrect `Activity` response class. 
+This has been corrected to `IssueEvent` which although is now correct could break calling 
+code that was written assuming this previous incorrect return type.
+
+### New in 0.23.0 (released 07/10/2016)
+
+**Features**
+
+ - Added support to test whether a URL points to a GitHub Enterprise instance - #1404 via @haacked
+ - Added granular methods for Protected Branches preview API - #1443 via @maddin2016
+ - Repository Traffic preview API support - #1457 via @maddin2016
+ - Preview API for merge/squash/rebase in repository settings - #1477 via @ryangribble
+ - Added support for performing a rebase and merge through the API- #1479 via @ryangribble
+
+**Fixes**
+
+ - Repository identifiers now use `long` instead of `int` - #1445 via @shana, #1485 via @ryangribble
+ - Searching for C# through the GitHub API now uses the correct alias - #1463 via @dampir
+ - Resolved deadlocking scenario in async/await usage - #1486 via @zzzprojects
+
+**Other**
+
+ - LINQPad samples are now verified at build time - #1456 via @mderriey
+ - More obsolete APIs removed - #1458 via @ryangribble
+ - .NET Core support has been started - #1462 via @mderriey
+
+**Breaking Changes**
+
+Repository identifiers returned from the GitHub API will exceed `Int32.MaxValue` in
+around 12 months, based on current growth. We've decided to update everywhere we
+require (or return) a repository identifier from `int` to `long` so that these will
+continue to work in the future, and the implicit conversion from `int` to `long`
+means the impact should be manageable now.
+
+`MergePullRequest.Squash` has been marked as obsolete in favour of the `MergeMethod`
+property - use `PullRequestMergeMethod.Squash` or `PullRequestMergeMethod.Rebase` if
+you want to change the merge behaviour when merging a pull request.
+
 ### New in 0.22.0 (released 2016/09/01)
 
 **Features**
