@@ -96,8 +96,17 @@ namespace Octokit
         /// Performs an asynchronous HTTP POST request.
         /// </summary>
         /// <param name="uri">URI endpoint to send request to</param>
-        /// <returns><seealso cref="IResponse"/> representing the received HTTP response</returns>
+        /// <returns>The returned <seealso cref="HttpStatusCode"/></returns>
         Task<HttpStatusCode> Post(Uri uri);
+
+        /// <summary>
+        /// Performs an asynchronous HTTP POST request.
+        /// </summary>
+        /// <param name="uri">URI endpoint to send request to</param>
+        /// <param name="body">The object to serialize as the body of the request</param>
+        /// <param name="accepts">Specifies accepted response media types.</param>
+        /// <returns>The returned <seealso cref="HttpStatusCode"/></returns>
+        Task<HttpStatusCode> Post(Uri uri, object body, string accepts);
 
         /// <summary>
         /// Performs an asynchronous HTTP POST request.
@@ -206,6 +215,14 @@ namespace Octokit
         Task<HttpStatusCode> Put(Uri uri);
 
         /// <summary>
+        /// Performs an asynchronous HTTP PUT request that expects an empty response.
+        /// </summary>
+        /// <param name="uri">URI endpoint to send request to</param>
+        /// <param name="accepts">Specifies accepted response media types.</param>
+        /// <returns>The returned <seealso cref="HttpStatusCode"/></returns>
+        Task<HttpStatusCode> Put(Uri uri, string accepts);
+
+        /// <summary>
         /// Performs an asynchronous HTTP DELETE request that expects an empty response.
         /// </summary>
         /// <param name="uri">URI endpoint to send request to</param>
@@ -275,5 +292,11 @@ namespace Octokit
         /// the default <see cref="InMemoryCredentialStore"/> with just these credentials.
         /// </remarks>
         Credentials Credentials { get; set; }
+
+        /// <summary>
+        /// Set the GitHub Api request timeout.
+        /// </summary>
+        /// <param name="timeout">The Timeout value</param>
+        void SetRequestTimeout(TimeSpan timeout);
     }
 }

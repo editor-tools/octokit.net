@@ -27,6 +27,10 @@ namespace Octokit.Internal
         {
             Ensure.ArgumentNotNull(getHandler, "getHandler");
 
+#if HAS_SERVICEPOINTMANAGER
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+#endif
+
             _http = new HttpClient(new RedirectHandler { InnerHandler = getHandler() });
         }
 
@@ -263,6 +267,15 @@ namespace Octokit.Internal
             }
 
             return newRequest;
+        }
+
+        /// <summary>
+        /// Set the GitHub Api request timeout.
+        /// </summary>
+        /// <param name="timeout">The Timeout value</param>
+        public void SetRequestTimeout(TimeSpan timeout)
+        {
+            _http.Timeout = timeout;
         }
     }
 

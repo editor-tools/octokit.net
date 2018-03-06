@@ -669,22 +669,6 @@ public class PullRequestsClientTests : IDisposable
     }
 
     [IntegrationTest]
-    public async Task CanBeMergedWithSquashCommit()
-    {
-        await CreateTheWorld();
-
-        var newPullRequest = new NewPullRequest("squash commit pull request", branchName, "master");
-        var pullRequest = await _fixture.Create(Helper.UserName, _context.RepositoryName, newPullRequest);
-
-        var merge = new MergePullRequest { CommitMessage = "fake commit message", CommitTitle = "fake title", Squash = true };
-        var result = await _fixture.Merge(Helper.UserName, _context.RepositoryName, pullRequest.Number, merge);
-        var commit = await _github.Repository.Commit.Get(_context.RepositoryOwner, _context.RepositoryName, result.Sha);
-
-        Assert.True(result.Merged);
-        Assert.Equal("fake title\n\nfake commit message", commit.Commit.Message);
-    }
-
-    [IntegrationTest]
     public async Task CanBeMergedWithMergeMethod()
     {
         await CreateTheWorld();
@@ -747,7 +731,7 @@ public class PullRequestsClientTests : IDisposable
         Assert.True(ex.Message.StartsWith("Head branch was modified"));
     }
 
-    [IntegrationTest(Skip = "this PR is actually mergeable - rewrite the test")]
+    [IntegrationTest]
     public async Task CannotBeMergedDueNotInMergeableState()
     {
         await CreateTheWorld();
@@ -765,6 +749,7 @@ public class PullRequestsClientTests : IDisposable
         var updatedPullRequest = await _fixture.Get(Helper.UserName, _context.RepositoryName, pullRequest.Number);
 
         Assert.False(updatedPullRequest.Mergeable);
+        Assert.Equal(updatedPullRequest.MergeableState, MergeableState.Dirty);
 
         var merge = new MergePullRequest { Sha = pullRequest.Head.Sha };
         var ex = await Assert.ThrowsAsync<PullRequestNotMergeableException>(() => _fixture.Merge(Helper.UserName, _context.RepositoryName, pullRequest.Number, merge));

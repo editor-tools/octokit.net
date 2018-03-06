@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
+using Octokit.Internal;
 
 namespace Octokit
 {
@@ -14,8 +15,9 @@ namespace Octokit
             Id = id;
         }
 
-        public PullRequestReviewComment(Uri url, int id, string diffHunk, string path, int? position, int? originalPosition, string commitId, string originalCommitId, User user, string body, DateTimeOffset createdAt, DateTimeOffset updatedAt, Uri htmlUrl, Uri pullRequestUrl)
+        public PullRequestReviewComment(string url, int id, string diffHunk, string path, int? position, int? originalPosition, string commitId, string originalCommitId, User user, string body, DateTimeOffset createdAt, DateTimeOffset updatedAt, string htmlUrl, string pullRequestUrl, int? inReplyToId, int? pullRequestReviewId)
         {
+            PullRequestReviewId = pullRequestReviewId;
             Url = url;
             Id = id;
             DiffHunk = diffHunk;
@@ -30,12 +32,13 @@ namespace Octokit
             UpdatedAt = updatedAt;
             HtmlUrl = htmlUrl;
             PullRequestUrl = pullRequestUrl;
+            InReplyToId = inReplyToId;
         }
 
         /// <summary>
         /// URL of the comment via the API.
         /// </summary>
-        public Uri Url { get; protected set; }
+        public string Url { get; protected set; }
 
         /// <summary>
         /// The comment Id.
@@ -95,14 +98,24 @@ namespace Octokit
         /// <summary>
         /// The URL for this comment on Github.com
         /// </summary>
-        public Uri HtmlUrl { get; protected set; }
+        public string HtmlUrl { get; protected set; }
 
         /// <summary>
         /// The URL for the pull request via the API.
         /// </summary>
-        public Uri PullRequestUrl { get; protected set; }
+        public string PullRequestUrl { get; protected set; }
 
         public ReactionSummary Reactions { get; protected set; }
+
+        /// <summary>
+        /// The Id of the comment this comment replys to.
+        /// </summary>
+        public int? InReplyToId { get; protected set; }
+
+        /// <summary>
+        /// The Id of the pull request this comment belongs to.
+        /// </summary>
+        public int? PullRequestReviewId { get; protected set; }
 
         internal string DebuggerDisplay
         {
@@ -115,11 +128,13 @@ namespace Octokit
         /// <summary>
         /// Sort by create date (default)
         /// </summary>
+        [Parameter(Value = "created")]
         Created,
 
         /// <summary>
         /// Sort by the date of the last update
         /// </summary>
+        [Parameter(Value = "updated")]
         Updated
     }
 }

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
-#if NET_45
 using System.Collections.Generic;
-#endif
 
 namespace Octokit
 {
@@ -36,7 +34,7 @@ namespace Octokit
         {
             var endpoint = ApiUrls.Teams(id);
 
-            return ApiConnection.Get<Team>(endpoint);
+            return ApiConnection.Get<Team>(endpoint, null, AcceptHeaders.NestedTeamsPreview);
         }
 
         /// <summary>
@@ -63,7 +61,7 @@ namespace Octokit
             Ensure.ArgumentNotNull(options, "options");
 
             var endpoint = ApiUrls.OrganizationTeams(org);
-            return ApiConnection.GetAll<Team>(endpoint, options);
+            return ApiConnection.GetAll<Team>(endpoint, null, AcceptHeaders.NestedTeamsPreview, options);
         }
 
         /// <summary>
@@ -88,17 +86,44 @@ namespace Octokit
 
             var endpoint = ApiUrls.UserTeams();
 
-            return ApiConnection.GetAll<Team>(endpoint, options);
+            return ApiConnection.GetAll<Team>(endpoint, null, AcceptHeaders.NestedTeamsPreview, options);
+        }
+
+        /// <summary>
+        /// Returns all child teams of the given team.
+        /// </summary>
+        /// <param name="id">The team identifier</param>
+        /// <remarks>
+        /// https://developer.github.com/v3/orgs/teams/#list-child-teams
+        /// </remarks>
+        public Task<IReadOnlyList<Team>> GetAllChildTeams(int id)
+        {
+            return GetAllChildTeams(id, ApiOptions.None);
+        }
+
+        /// <summary>
+        /// Returns all child teams of the given team.
+        /// </summary>
+        /// <param name="id">The team identifier</param>
+        /// <remarks>
+        /// https://developer.github.com/v3/orgs/teams/#list-child-teams
+        /// </remarks>
+        public Task<IReadOnlyList<Team>> GetAllChildTeams(int id, ApiOptions options)
+        {
+            Ensure.ArgumentNotNull(options, nameof(options));
+
+            var endpoint = ApiUrls.TeamChildTeams(id);
+
+            return ApiConnection.GetAll<Team>(endpoint, null, AcceptHeaders.NestedTeamsPreview, options);
         }
 
         /// <summary>
         /// Returns all members of the given team. 
         /// </summary>
-        /// <param name="id">The team identifier</param>
         /// <remarks>
         /// https://developer.github.com/v3/orgs/teams/#list-team-members
         /// </remarks>
-        /// <returns>A list of the team's member <see cref="User"/>s.</returns>
+        /// <param name="id">The team identifier</param>
         public Task<IReadOnlyList<User>> GetAllMembers(int id)
         {
             return GetAllMembers(id, ApiOptions.None);
@@ -112,14 +137,47 @@ namespace Octokit
         /// </remarks>
         /// <param name="id">The team identifier</param>
         /// <param name="options">Options to change API behaviour.</param>
-        /// <returns>A list of the team's member <see cref="User"/>s.</returns>
         public Task<IReadOnlyList<User>> GetAllMembers(int id, ApiOptions options)
         {
             Ensure.ArgumentNotNull(options, "options");
 
             var endpoint = ApiUrls.TeamMembers(id);
 
-            return ApiConnection.GetAll<User>(endpoint, options);
+            return ApiConnection.GetAll<User>(endpoint, null, AcceptHeaders.NestedTeamsPreview, options);
+        }
+
+        /// <summary>
+        /// Returns all members with the specified role in the given team of the given role.
+        /// </summary>
+        /// <remarks>
+        /// https://developer.github.com/v3/orgs/teams/#list-team-members
+        /// </remarks>
+        /// <param name="id">The team identifier</param>
+        /// <param name="request">The request filter</param>
+        public Task<IReadOnlyList<User>> GetAllMembers(int id, TeamMembersRequest request)
+        {
+            Ensure.ArgumentNotNull(request, nameof(request));
+
+            return GetAllMembers(id, request, ApiOptions.None);
+        }
+
+        /// <summary>
+        /// Returns all members with the specified role in the given team of the given role.
+        /// </summary>
+        /// <remarks>
+        /// https://developer.github.com/v3/orgs/teams/#list-team-members
+        /// </remarks>
+        /// <param name="id">The team identifier</param>
+        /// <param name="request">The request filter</param>
+        /// <param name="options">Options to change API behaviour.</param>
+        public Task<IReadOnlyList<User>> GetAllMembers(int id, TeamMembersRequest request, ApiOptions options)
+        {
+            Ensure.ArgumentNotNull(request, nameof(request));
+            Ensure.ArgumentNotNull(options, nameof(options));
+
+            var endpoint = ApiUrls.TeamMembers(id);
+
+            return ApiConnection.GetAll<User>(endpoint, request.ToParametersDictionary(), AcceptHeaders.NestedTeamsPreview, options);
         }
 
         /// <summary>
@@ -128,16 +186,18 @@ namespace Octokit
         /// </summary>
         /// <param name="id">The team to check.</param>
         /// <param name="login">The user to check.</param>
-        /// <returns>A <see cref="TeamMembership"/> result indicating the membership status</returns>
+        [Obsolete("Please use GetMembershipDetails instead")]
         public async Task<TeamMembership> GetMembership(int id, string login)
         {
+            Ensure.ArgumentNotNullOrEmptyString(login, "login");
+
             var endpoint = ApiUrls.TeamMember(id, login);
 
             Dictionary<string, string> response;
 
             try
             {
-                response = await ApiConnection.Get<Dictionary<string, string>>(endpoint).ConfigureAwait(false);
+                response = await ApiConnection.Get<Dictionary<string, string>>(endpoint, null, AcceptHeaders.NestedTeamsPreview).ConfigureAwait(false);
             }
             catch (NotFoundException)
             {
@@ -147,6 +207,25 @@ namespace Octokit
             return response["state"] == "active"
                 ? TeamMembership.Active
                 : TeamMembership.Pending;
+        }
+
+        /// <summary>
+        /// Gets whether the user with the given <paramref name="login"/> 
+        /// is a member of the team with the given <paramref name="id"/>.
+        /// A <see cref="NotFoundException"/> is thrown if the user is not a member.
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/orgs/teams/#get-team-membership">API documentation</a> for more information.
+        /// </remarks>
+        /// <param name="id">The team to check.</param>
+        /// <param name="login">The user to check.</param>
+        public Task<TeamMembershipDetails> GetMembershipDetails(int id, string login)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(login, nameof(login));
+
+            var endpoint = ApiUrls.TeamMember(id, login);
+
+            return ApiConnection.Get<TeamMembershipDetails>(endpoint, null, AcceptHeaders.NestedTeamsPreview);
         }
 
         /// <summary>
@@ -160,7 +239,7 @@ namespace Octokit
             Ensure.ArgumentNotNull(team, "team");
 
             var endpoint = ApiUrls.OrganizationTeams(org);
-            return ApiConnection.Post<Team>(endpoint, team);
+            return ApiConnection.Post<Team>(endpoint, team, AcceptHeaders.NestedTeamsPreview);
         }
 
         /// <summary>
@@ -173,7 +252,7 @@ namespace Octokit
             Ensure.ArgumentNotNull(team, "team");
 
             var endpoint = ApiUrls.Teams(id);
-            return ApiConnection.Patch<Team>(endpoint, team);
+            return ApiConnection.Patch<Team>(endpoint, team, AcceptHeaders.NestedTeamsPreview);
         }
 
         /// <summary>
@@ -185,19 +264,18 @@ namespace Octokit
         {
             var endpoint = ApiUrls.Teams(id);
 
-            return ApiConnection.Delete(endpoint);
+            return ApiConnection.Delete(endpoint, new object(), AcceptHeaders.NestedTeamsPreview);
         }
 
         /// <summary>
         /// Adds a <see cref="User"/> to a <see cref="Team"/>.
         /// </summary>
         /// <remarks>
-        /// See the <a href="https://developer.github.com/v3/orgs/teams/#add-team-member">API documentation</a> for more information.
+        /// See the <a href="https://developer.github.com/v3/orgs/teams/#add-or-update-team-membership">API documentation</a> for more information.
         /// </remarks>
         /// <param name="id">The team identifier.</param>
         /// <param name="login">The user to add to the team.</param>
-        /// <exception cref="ApiValidationException">Thrown if you attempt to add an organization to a team.</exception>
-        /// <returns>A <see cref="TeamMembership"/> result indicating the membership status</returns>
+        [Obsolete("Please use AddOrEditMembership instead")]
         public async Task<TeamMembership> AddMembership(int id, string login)
         {
             Ensure.ArgumentNotNullOrEmptyString(login, "login");
@@ -226,6 +304,25 @@ namespace Octokit
         }
 
         /// <summary>
+        /// Adds a <see cref="User"/> to a <see cref="Team"/>.
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/orgs/teams/#add-or-update-team-membership">API documentation</a> for more information.
+        /// </remarks>
+        /// <param name="id">The team identifier.</param>
+        /// <param name="login">The user to add to the team.</param>
+        /// <param name="request">Additional parameters for the request</param>
+        public Task<TeamMembershipDetails> AddOrEditMembership(int id, string login, UpdateTeamMembership request)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(login, nameof(login));
+            Ensure.ArgumentNotNull(request, nameof(request));
+
+            var endpoint = ApiUrls.TeamMember(id, login);
+
+            return ApiConnection.Put<TeamMembershipDetails>(endpoint, request);
+        }
+
+        /// <summary>
         /// Removes a <see cref="User"/> from a <see cref="Team"/>.
         /// </summary>
         /// <remarks>
@@ -242,7 +339,7 @@ namespace Octokit
 
             try
             {
-                var httpStatusCode = await ApiConnection.Connection.Delete(endpoint).ConfigureAwait(false);
+                var httpStatusCode = await ApiConnection.Connection.Delete(endpoint, null, AcceptHeaders.NestedTeamsPreview).ConfigureAwait(false);
 
                 return httpStatusCode == HttpStatusCode.NoContent;
             }
@@ -276,7 +373,7 @@ namespace Octokit
 
             var endpoint = ApiUrls.TeamRepositories(id);
 
-            return ApiConnection.GetAll<Repository>(endpoint, null, AcceptHeaders.OrganizationPermissionsPreview, options);
+            return ApiConnection.GetAll<Repository>(endpoint, null, AcceptHeaders.NestedTeamsPreview, options);
         }
 
         /// <summary>
@@ -293,7 +390,7 @@ namespace Octokit
 
             try
             {
-                var httpStatusCode = await ApiConnection.Connection.Put(endpoint).ConfigureAwait(false);
+                var httpStatusCode = await ApiConnection.Connection.Put(endpoint, AcceptHeaders.NestedTeamsPreview).ConfigureAwait(false);
                 return httpStatusCode == HttpStatusCode.NoContent;
             }
             catch (NotFoundException)
@@ -320,7 +417,7 @@ namespace Octokit
 
             try
             {
-                var httpStatusCode = await ApiConnection.Connection.Put<HttpStatusCode>(endpoint, permission, "", AcceptHeaders.OrganizationPermissionsPreview).ConfigureAwait(false);
+                var httpStatusCode = await ApiConnection.Connection.Put<HttpStatusCode>(endpoint, permission, "", AcceptHeaders.NestedTeamsPreview).ConfigureAwait(false);
                 return httpStatusCode.HttpResponse.StatusCode == HttpStatusCode.NoContent;
             }
             catch (NotFoundException)
@@ -372,13 +469,44 @@ namespace Octokit
 
             try
             {
-                var response = await ApiConnection.Connection.GetResponse<string>(endpoint).ConfigureAwait(false);
+                var response = await ApiConnection.Connection.Get<string>(endpoint, null, AcceptHeaders.NestedTeamsPreview).ConfigureAwait(false);
                 return response.HttpResponse.StatusCode == HttpStatusCode.NoContent;
             }
             catch (NotFoundException)
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// List all pending invitations for the given team.
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/orgs/teams/#list-pending-team-invitations">API Documentation</a>
+        /// for more information.
+        /// </remarks>
+        /// <param name="id">The team identifier</param>
+        /// <returns></returns>
+        public Task<IReadOnlyList<OrganizationMembershipInvitation>> GetAllPendingInvitations(int id)
+        {
+            Ensure.ArgumentNotNull(id, nameof(id));
+
+            return GetAllPendingInvitations(id, ApiOptions.None);
+        }
+
+        /// <summary>
+        /// List all pending invitations for the given team.
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/orgs/teams/#list-pending-team-invitations">API Documentation</a>
+        /// for more information.
+        /// </remarks>
+        /// <param name="id">The team identifier</param>
+        /// <param name="options">Options to change API behaviour</param>
+        /// <returns></returns>
+        public Task<IReadOnlyList<OrganizationMembershipInvitation>> GetAllPendingInvitations(int id, ApiOptions options)
+        {
+            return ApiConnection.GetAll<OrganizationMembershipInvitation>(ApiUrls.TeamPendingInvitations(id), null, AcceptHeaders.OrganizationMembershipPreview, options);
         }
     }
 }

@@ -133,7 +133,7 @@ namespace Octokit
 
             if (Fork != null)
             {
-                parameters.Add(string.Format(CultureInfo.InvariantCulture, "fork:{0}", Fork));
+                parameters.Add(string.Format(CultureInfo.InvariantCulture, "fork:{0}", Fork.ToParameter()));
             }
 
             if (Stars != null)
@@ -179,8 +179,13 @@ namespace Octokit
     /// </summary>
     public enum InQualifier
     {
+        [Parameter(Value = "name")]
         Name,
+
+        [Parameter(Value = "description")]
         Description,
+
+        [Parameter(Value = "readme")]
         Readme
     }
 
@@ -775,12 +780,12 @@ namespace Octokit
         /// <summary>
         /// only search for forked repos
         /// </summary>
-        [Parameter(Value = "Only")]
+        [Parameter(Value = "only")]
         OnlyForks,
         /// <summary>
         /// include forked repos into the search
         /// </summary>
-        [Parameter(Value = "True")]
+        [Parameter(Value = "true")]
         IncludeForks
     }
 }

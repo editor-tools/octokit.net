@@ -4,14 +4,18 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Octokit.Internal;
+#if !HAS_ENVIRONMENT
+using System.Runtime.InteropServices;
+#endif
 
 namespace Octokit
 {
     // NOTE: Every request method must go through the `RunRequest` code path. So if you need to add a new method
-    //       ensure it goes through there. :)
+    // ensure it goes through there. :)
     /// <summary>
     /// A connection for making HTTP requests against URI endpoints.
     /// </summary>
@@ -27,9 +31,12 @@ namespace Octokit
         /// <summary>
         /// Creates a new connection instance used to make requests of the GitHub API.
         /// </summary>
+        /// <remarks>
+        /// See more information regarding User-Agent requirements here: https://developer.github.com/v3/#user-agent-required
+        /// </remarks>
         /// <param name="productInformation">
-        /// The name (and optionally version) of the product using this library. This is sent to the server as part of
-        /// the user agent for analytics purposes.
+        /// The name (and optionally version) of the product using this library, the name of your GitHub organization, or your GitHub username (in that order of preference). This is sent to the server as part of
+        /// the user agent for analytics purposes, and used by GitHub to contact you if there are problems.
         /// </param>
         public Connection(ProductHeaderValue productInformation)
             : this(productInformation, _defaultGitHubApiUrl, _anonymousCredentials)
@@ -39,9 +46,12 @@ namespace Octokit
         /// <summary>
         /// Creates a new connection instance used to make requests of the GitHub API.
         /// </summary>
+        /// <remarks>
+        /// See more information regarding User-Agent requirements here: https://developer.github.com/v3/#user-agent-required
+        /// </remarks>
         /// <param name="productInformation">
-        /// The name (and optionally version) of the product using this library. This is sent to the server as part of
-        /// the user agent for analytics purposes.
+        /// The name (and optionally version) of the product using this library, the name of your GitHub organization, or your GitHub username (in that order of preference). This is sent to the server as part of
+        /// the user agent for analytics purposes, and used by GitHub to contact you if there are problems.
         /// </param>
         /// <param name="httpClient">
         /// The client to use for executing requests
@@ -54,12 +64,15 @@ namespace Octokit
         /// <summary>
         /// Creates a new connection instance used to make requests of the GitHub API.
         /// </summary>
+        /// <remarks>
+        /// See more information regarding User-Agent requirements here: https://developer.github.com/v3/#user-agent-required
+        /// </remarks>
         /// <param name="productInformation">
-        /// The name (and optionally version) of the product using this library. This is sent to the server as part of
-        /// the user agent for analytics purposes.
+        /// The name (and optionally version) of the product using this library, the name of your GitHub organization, or your GitHub username (in that order of preference). This is sent to the server as part of
+        /// the user agent for analytics purposes, and used by GitHub to contact you if there are problems.
         /// </param>
         /// <param name="baseAddress">
-        /// The address to point this client to such as https://api.github.com or the URL to a GitHub Enterprise 
+        /// The address to point this client to such as https://api.github.com or the URL to a GitHub Enterprise
         /// instance</param>
         public Connection(ProductHeaderValue productInformation, Uri baseAddress)
             : this(productInformation, baseAddress, _anonymousCredentials)
@@ -69,9 +82,12 @@ namespace Octokit
         /// <summary>
         /// Creates a new connection instance used to make requests of the GitHub API.
         /// </summary>
+        /// <remarks>
+        /// See more information regarding User-Agent requirements here: https://developer.github.com/v3/#user-agent-required
+        /// </remarks>
         /// <param name="productInformation">
-        /// The name (and optionally version) of the product using this library. This is sent to the server as part of
-        /// the user agent for analytics purposes.
+        /// The name (and optionally version) of the product using this library, the name of your GitHub organization, or your GitHub username (in that order of preference). This is sent to the server as part of
+        /// the user agent for analytics purposes, and used by GitHub to contact you if there are problems.
         /// </param>
         /// <param name="credentialStore">Provides credentials to the client when making requests</param>
         public Connection(ProductHeaderValue productInformation, ICredentialStore credentialStore)
@@ -82,12 +98,15 @@ namespace Octokit
         /// <summary>
         /// Creates a new connection instance used to make requests of the GitHub API.
         /// </summary>
+        /// <remarks>
+        /// See more information regarding User-Agent requirements here: https://developer.github.com/v3/#user-agent-required
+        /// </remarks>
         /// <param name="productInformation">
-        /// The name (and optionally version) of the product using this library. This is sent to the server as part of
-        /// the user agent for analytics purposes.
+        /// The name (and optionally version) of the product using this library, the name of your GitHub organization, or your GitHub username (in that order of preference). This is sent to the server as part of
+        /// the user agent for analytics purposes, and used by GitHub to contact you if there are problems.
         /// </param>
         /// <param name="baseAddress">
-        /// The address to point this client to such as https://api.github.com or the URL to a GitHub Enterprise 
+        /// The address to point this client to such as https://api.github.com or the URL to a GitHub Enterprise
         /// instance</param>
         /// <param name="credentialStore">Provides credentials to the client when making requests</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
@@ -99,12 +118,15 @@ namespace Octokit
         /// <summary>
         /// Creates a new connection instance used to make requests of the GitHub API.
         /// </summary>
+        /// <remarks>
+        /// See more information regarding User-Agent requirements here: https://developer.github.com/v3/#user-agent-required
+        /// </remarks>
         /// <param name="productInformation">
-        /// The name (and optionally version) of the product using this library. This is sent to the server as part of
-        /// the user agent for analytics purposes.
+        /// The name (and optionally version) of the product using this library, the name of your GitHub organization, or your GitHub username (in that order of preference). This is sent to the server as part of
+        /// the user agent for analytics purposes, and used by GitHub to contact you if there are problems.
         /// </param>
         /// <param name="baseAddress">
-        /// The address to point this client to such as https://api.github.com or the URL to a GitHub Enterprise 
+        /// The address to point this client to such as https://api.github.com or the URL to a GitHub Enterprise
         /// instance</param>
         /// <param name="credentialStore">Provides credentials to the client when making requests</param>
         /// <param name="httpClient">A raw <see cref="IHttpClient"/> used to make requests</param>
@@ -216,6 +238,14 @@ namespace Octokit
             Ensure.ArgumentNotNull(uri, "uri");
 
             var response = await SendData<object>(uri, HttpMethod.Post, null, null, null, CancellationToken.None).ConfigureAwait(false);
+            return response.HttpResponse.StatusCode;
+        }
+
+        public async Task<HttpStatusCode> Post(Uri uri, object body, string accepts)
+        {
+            Ensure.ArgumentNotNull(uri, "uri");
+
+            var response = await SendData<object>(uri, HttpMethod.Post, body, accepts, null, CancellationToken.None).ConfigureAwait(false);
             return response.HttpResponse.StatusCode;
         }
 
@@ -420,6 +450,21 @@ namespace Octokit
         }
 
         /// <summary>
+        /// Performs an asynchronous HTTP PUT request that expects an empty response.
+        /// </summary>
+        /// <param name="uri">URI endpoint to send request to</param>
+        /// <param name="accepts">Specifies accepted response media types.</param>
+        /// <returns>The returned <seealso cref="HttpStatusCode"/></returns>
+        public async Task<HttpStatusCode> Put(Uri uri, string accepts)
+        {
+            Ensure.ArgumentNotNull(uri, nameof(uri));
+            Ensure.ArgumentNotNull(accepts, nameof(accepts));
+
+            var response = await SendData<object>(uri, HttpMethod.Put, null, accepts, null, CancellationToken.None).ConfigureAwait(false);
+            return response.HttpResponse.StatusCode;
+        }
+
+        /// <summary>
         /// Performs an asynchronous HTTP DELETE request that expects an empty response.
         /// </summary>
         /// <param name="uri">URI endpoint to send request to</param>
@@ -539,9 +584,9 @@ namespace Octokit
         /// Gets or sets the credentials used by the connection.
         /// </summary>
         /// <remarks>
-        /// You can use this property if you only have a single hard-coded credential. Otherwise, pass in an 
-        /// <see cref="ICredentialStore"/> to the constructor. 
-        /// Setting this property will change the <see cref="ICredentialStore"/> to use 
+        /// You can use this property if you only have a single hard-coded credential. Otherwise, pass in an
+        /// <see cref="ICredentialStore"/> to the constructor.
+        /// Setting this property will change the <see cref="ICredentialStore"/> to use
         /// the default <see cref="InMemoryCredentialStore"/> with just these credentials.
         /// </remarks>
         public Credentials Credentials
@@ -670,24 +715,69 @@ namespace Octokit
 
         static string FormatUserAgent(ProductHeaderValue productInformation)
         {
-            return string.Format(CultureInfo.InvariantCulture,
-                "{0} ({1} {2}; {3}; {4}; Octokit {5})",
+            return string.Format(CultureInfo.InvariantCulture, "{0} ({1}; {2}; Octokit {3})",
                 productInformation,
-#if NETFX_CORE
-                // Microsoft doesn't want you changing your Windows Store Application based on the processor or
-                // Windows version. If we really wanted this information, we could do a best guess based on
-                // this approach: http://attackpattern.com/2013/03/device-information-in-windows-8-store-apps/
-                // But I don't think we care all that much.
-                "WindowsRT",
-                "8+",
-                "unknown",
+                GetPlatformInformation(),
+                GetCultureInformation(),
+                GetVersionInformation());
+        }
+
+        private static string _platformInformation;
+        static string GetPlatformInformation()
+        {
+            if (string.IsNullOrEmpty(_platformInformation))
+            {
+                try
+                {
+                    _platformInformation = string.Format(CultureInfo.InvariantCulture,
+#if !HAS_ENVIRONMENT
+                        "{0}; {1}",
+                        RuntimeInformation.OSDescription.Trim(),
+                        RuntimeInformation.OSArchitecture.ToString().ToLowerInvariant().Trim()
 #else
-                Environment.OSVersion.Platform,
-                Environment.OSVersion.Version.ToString(3),
-                Environment.Is64BitOperatingSystem ? "amd64" : "x86",
+                        "{0} {1}; {2}",
+                        Environment.OSVersion.Platform,
+                        Environment.OSVersion.Version.ToString(3),
+                        Environment.Is64BitOperatingSystem ? "amd64" : "x86"
 #endif
-                CultureInfo.CurrentCulture.Name,
-                AssemblyVersionInformation.Version);
+                        );
+                }
+                catch
+                {
+                    _platformInformation = "Unknown Platform";
+                }
+            }
+
+            return _platformInformation;
+        }
+
+        static string GetCultureInformation()
+        {
+            return CultureInfo.CurrentCulture.Name;
+        }
+
+        private static string _versionInformation;
+        static string GetVersionInformation()
+        {
+            if (string.IsNullOrEmpty(_versionInformation))
+            {
+                _versionInformation = typeof(IGitHubClient)
+                    .GetTypeInfo()
+                    .Assembly
+                    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                    .InformationalVersion;
+            }
+
+            return _versionInformation;
+        }
+
+        /// <summary>
+        /// Set the GitHub Api request timeout.
+        /// </summary>
+        /// <param name="timeout">The Timeout value</param>
+        public void SetRequestTimeout(TimeSpan timeout)
+        {
+            _httpClient.SetRequestTimeout(timeout);
         }
     }
 }

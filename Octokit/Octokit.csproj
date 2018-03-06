@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{08DD4305-7787-4823-A53F-4D0F725A07F3}</ProjectGuid>
+    <ProjectGuid>{104E8324-C2B9-43BE-8040-36B736A64D45}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Octokit</RootNamespace>
@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <CodeAnalysisCulture>en-US</CodeAnalysisCulture>
-    <LangVersion>5</LangVersion>
+    <LangVersion>6</LangVersion>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
@@ -22,7 +22,7 @@
     <Optimize>false</Optimize>
     <IntermediateOutputPath>obj\Debug\Net45</IntermediateOutputPath>
     <OutputPath>bin\Debug\Net45</OutputPath>
-    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;SIMPLE_JSON_OBJARRAYINTERNAL;SIMPLE_JSON_INTERNAL;NET_45;SIMPLE_JSON_READONLY_COLLECTIONS</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;SIMPLE_JSON_OBJARRAYINTERNAL;SIMPLE_JSON_INTERNAL;NET_45;SIMPLE_JSON_READONLY_COLLECTIONS;HAS_ENVIRONMENT</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>false</RunCodeAnalysis>
@@ -36,7 +36,7 @@
     <Optimize>true</Optimize>
     <IntermediateOutputPath>obj\Release\Net45</IntermediateOutputPath>
     <OutputPath>bin\Release\Net45\</OutputPath>
-    <DefineConstants>TRACE;CODE_ANALYSIS;SIMPLE_JSON_OBJARRAYINTERNAL;SIMPLE_JSON_INTERNAL;NET_45;SIMPLE_JSON_READONLY_COLLECTIONS</DefineConstants>
+    <DefineConstants>TRACE;CODE_ANALYSIS;SIMPLE_JSON_OBJARRAYINTERNAL;SIMPLE_JSON_INTERNAL;NET_45;SIMPLE_JSON_READONLY_COLLECTIONS;HAS_ENVIRONMENT</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -66,7 +66,13 @@
     <Compile Include="Clients\IIssueCommentReactionsClient.cs" />
     <Compile Include="Clients\IIssueReactionsClient.cs" />
     <Compile Include="Clients\IIssueTimelineClient.cs" />
+    <Compile Include="Clients\IOrganizationOutsideCollaboratorsClient.cs" />
+    <Compile Include="Clients\IProjectCardsClient.cs" />
+    <Compile Include="Clients\IProjectColumnsClient.cs" />
+    <Compile Include="Clients\IProjectsClient.cs" />
     <Compile Include="Clients\IPullRequestReviewCommentReactionsClient.cs" />
+    <Compile Include="Clients\IPullRequestReviewRequestsClient.cs" />
+    <Compile Include="Clients\IPullRequestReviewsClient.cs" />
     <Compile Include="Clients\IRepositoryInvitationsClient.cs" />
     <Compile Include="Clients\IRepositoryBranchesClient.cs" />
     <Compile Include="Clients\IRepositoryTrafficClient.cs" />
@@ -104,7 +110,13 @@
     <Compile Include="Clients\IRepositoryContentsClient.cs" />
     <Compile Include="Clients\OrganizationMembersClient.cs" />
     <Compile Include="Clients\CommitCommentReactionsClient.cs" />
+    <Compile Include="Clients\OrganizationOutsideCollaboratorsClient.cs" />
+    <Compile Include="Clients\ProjectCardsClient.cs" />
+    <Compile Include="Clients\ProjectColumnsClient.cs" />
+    <Compile Include="Clients\ProjectsClient.cs" />
     <Compile Include="Clients\PullRequestReviewCommentReactionsClient.cs" />
+    <Compile Include="Clients\PullRequestReviewRequestsClient.cs" />
+    <Compile Include="Clients\PullRequestReviewsClient.cs" />
     <Compile Include="Clients\ReactionsClient.cs" />
     <Compile Include="Clients\RepositoryBranchesClient.cs" />
     <Compile Include="Clients\RepositoryCommentsClient.cs" />
@@ -128,14 +140,17 @@
     <Compile Include="Exceptions\PullRequestNotMergeableException.cs" />
     <Compile Include="Exceptions\RepositoryExistsException.cs" />
     <Compile Include="Exceptions\RepositoryFormatException.cs" />
-    <Compile Include="Exceptions\RepositoryWebHookConfigException.cs" />
     <Compile Include="Exceptions\TwoFactorAuthorizationException.cs" />
+    <Compile Include="Exceptions\UserIsLastOwnerOfOrganizationException.cs" />
+    <Compile Include="Exceptions\UserIsNotMemberOfOrganizationException.cs" />
+    <Compile Include="Exceptions\UserIsOrganizationMemberException.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Helpers\AcceptHeaders.cs" />
     <Compile Include="Helpers\ApiErrorExtensions.cs" />
     <Compile Include="Helpers\ApiUrls.Authorizations.cs" />
     <Compile Include="Helpers\ConcurrentCache.cs" />
-    <Compile Include="Helpers\ExcludeFromPaginationConventionTest.cs" />
+    <Compile Include="Helpers\ExcludeFromPaginationApiOptionsConventionTestAttribute.cs" />
+    <Compile Include="Helpers\ExcludeFromPaginationNamingConventionTest.cs" />
     <Compile Include="Helpers\HttpClientExtensions.cs" />
     <Compile Include="Helpers\Pagination.cs" />
     <Compile Include="Helpers\PropertyOrField.cs" />
@@ -148,12 +163,15 @@
     <Compile Include="Http\RequestBody.cs" />
     <Compile Include="Clients\IReactionsClient.cs" />
     <Compile Include="Models\Request\BranchProtectionUpdate.cs" />
-    <Compile Include="Models\Request\BranchUpdate.cs" />
     <Compile Include="Models\Request\ApiOptions.cs" />
     <Compile Include="Models\Request\AssigneesUpdate.cs" />
     <Compile Include="Models\Request\CollaboratorRequest.cs" />
+    <Compile Include="Models\Request\DraftPullRequestReviewComment.cs" />
     <Compile Include="Models\Request\InvitationUpdate.cs" />
     <Compile Include="Models\Request\IssueCommentRequest.cs" />
+    <Compile Include="Models\Request\NewProject.cs" />
+    <Compile Include="Models\Request\NewProjectCard.cs" />
+    <Compile Include="Models\Request\NewProjectColumn.cs" />
     <Compile Include="Models\Request\NewReaction.cs" />
     <Compile Include="Models\Request\NewGpgKey.cs" />
     <Compile Include="Models\Request\NewImpersonationToken.cs" />
@@ -166,7 +184,17 @@
     <Compile Include="Models\Request\NewRepositoryWebHook.cs" />
     <Compile Include="Models\Request\NewUser.cs" />
     <Compile Include="Models\Request\OrganizationRequest.cs" />
+    <Compile Include="Models\Request\ProjectCardMove.cs" />
+    <Compile Include="Models\Request\ProjectCardUpdate.cs" />
+    <Compile Include="Models\Request\ProjectColumnMove.cs" />
+    <Compile Include="Models\Request\ProjectColumnUpdate.cs" />
+    <Compile Include="Models\Request\ProjectRequest.cs" />
+    <Compile Include="Models\Request\ProjectUpdate.cs" />
     <Compile Include="Models\Request\PublicRepositoryRequest.cs" />
+    <Compile Include="Models\Request\PullRequestReviewCreate.cs" />
+    <Compile Include="Models\Request\PullRequestReviewDismiss.cs" />
+    <Compile Include="Models\Request\PullRequestReviewRequest.cs" />
+    <Compile Include="Models\Request\PullRequestReviewSubmit.cs" />
     <Compile Include="Models\Request\ReleaseAssetUpload.cs" />
     <Compile Include="Models\Request\RepositoryForksListRequest.cs" />
     <Compile Include="Models\Request\RepositoryRequest.cs" />
@@ -183,6 +211,8 @@
     <Compile Include="Models\Request\CommitRequest.cs" />
     <Compile Include="Models\Request\StartMigrationRequest.cs" />
     <Compile Include="Models\Request\RepositoryPermissionRequest.cs" />
+    <Compile Include="Models\Request\TeamMembersRequest.cs" />
+    <Compile Include="Models\Request\UpdateTeamMembership.cs" />
     <Compile Include="Models\Request\UserRename.cs" />
     <Compile Include="Models\Response\ActivityPayloads\ActivityPayload.cs" />
     <Compile Include="Models\Response\ActivityPayloads\CommitCommentPayload.cs" />
@@ -193,8 +223,18 @@
     <Compile Include="Models\Response\ActivityPayloads\PullRequestEventPayload.cs" />
     <Compile Include="Models\Response\ActivityPayloads\PushEventPayload.cs" />
     <Compile Include="Models\Response\ActivityPayloads\StarredEventPayload.cs" />
+    <Compile Include="Models\Response\ActivityPayloads\StatusEventPayload.cs" />
     <Compile Include="Models\Response\BranchProtection.cs" />
+    <Compile Include="Models\Response\CollaboratorPermission.cs" />
     <Compile Include="Models\Response\CombinedCommitStatus.cs" />
+    <Compile Include="Models\Response\MembershipState.cs" />
+    <Compile Include="Models\Response\OrganizationMembershipInvitation.cs" />
+    <Compile Include="Models\Response\OrganizationMembershipRole.cs" />
+    <Compile Include="Models\Response\PermissionLevel.cs" />
+    <Compile Include="Models\Response\Project.cs" />
+    <Compile Include="Models\Response\ProjectCard.cs" />
+    <Compile Include="Models\Response\ProjectColumn.cs" />
+    <Compile Include="Models\Response\PullRequestReview.cs" />
     <Compile Include="Models\Response\Reaction.cs" />
     <Compile Include="Models\Response\CommitContent.cs" />
     <Compile Include="Models\Response\Enterprise\AdminStats.cs" />
@@ -228,8 +268,11 @@
     <Compile Include="Models\Response\PublicKey.cs" />
     <Compile Include="Models\Response\PullRequestFile.cs" />
     <Compile Include="Models\Response\RenameInfo.cs" />
+    <Compile Include="Models\Response\RepositoryContentLicense.cs" />
     <Compile Include="Models\Response\RepositoryInvitation.cs" />
     <Compile Include="Models\Response\SourceInfo.cs" />
+    <Compile Include="Models\Response\StringEnum.cs" />
+    <Compile Include="Models\Response\TeamMembershipDetails.cs" />
     <Compile Include="Models\Response\TimelineEventInfo.cs" />
     <Compile Include="Models\Response\RepositoryTrafficClone.cs" />
     <Compile Include="Models\Response\RepositoryTrafficPath.cs" />

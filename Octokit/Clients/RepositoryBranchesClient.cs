@@ -118,39 +118,6 @@ namespace Octokit
         }
 
         /// <summary>
-        /// Edit the specified branch with the values given in <paramref name="update"/>
-        /// </summary>
-        /// <param name="owner">The owner of the repository</param>
-        /// <param name="name">The name of the repository</param>
-        /// <param name="branch">The name of the branch</param>
-        /// <param name="update">New values to update the branch with</param>
-        [Obsolete("This existing implementation will cease to work when the Branch Protection API preview period ends.  Please use other RepositoryBranchesClient methods instead.")]
-        public Task<Branch> Edit(string owner, string name, string branch, BranchUpdate update)
-        {
-            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
-            Ensure.ArgumentNotNullOrEmptyString(name, "name");
-            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
-            Ensure.ArgumentNotNull(update, "update");
-
-            return ApiConnection.Patch<Branch>(ApiUrls.RepoBranch(owner, name, branch), update, AcceptHeaders.ProtectedBranchesApiPreview);
-        }
-
-        /// <summary>
-        /// Edit the specified branch with the values given in <paramref name="update"/>
-        /// </summary>
-        /// <param name="repositoryId">The Id of the repository</param>
-        /// <param name="branch">The name of the branch</param>
-        /// <param name="update">New values to update the branch with</param>
-        [Obsolete("This existing implementation will cease to work when the Branch Protection API preview period ends.  Please use other RepositoryBranchesClient methods instead.")]
-        public Task<Branch> Edit(long repositoryId, string branch, BranchUpdate update)
-        {
-            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
-            Ensure.ArgumentNotNull(update, "update");
-
-            return ApiConnection.Patch<Branch>(ApiUrls.RepoBranch(repositoryId, branch), update, AcceptHeaders.ProtectedBranchesApiPreview);
-        }
-
-        /// <summary>
         /// Get the branch protection settings for the specified branch
         /// </summary>
         /// <remarks>
@@ -403,7 +370,36 @@ namespace Octokit
         /// <param name="owner">The owner of the repository</param>
         /// <param name="name">The name of the repository</param>
         /// <param name="branch">The name of the branch</param>
+        [Obsolete("Please use GetAllRequiredStatusChecksContexts instead")]
         public Task<IReadOnlyList<string>> GetRequiredStatusChecksContexts(string owner, string name, string branch)
+        {
+            return GetAllRequiredStatusChecksContexts(owner, name, branch);
+        }
+
+        /// <summary>
+        /// Get the required status checks contexts for the specified branch
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#list-required-status-checks-contexts-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="repositoryId">The Id of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        [Obsolete("Please use GetAllRequiredStatusChecksContexts instead")]
+        public Task<IReadOnlyList<string>> GetRequiredStatusChecksContexts(long repositoryId, string branch)
+        {
+            return GetAllRequiredStatusChecksContexts(repositoryId, branch);
+        }
+
+        /// <summary>
+        /// Get the required status checks contexts for the specified branch
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#list-required-status-checks-contexts-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="owner">The owner of the repository</param>
+        /// <param name="name">The name of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        public Task<IReadOnlyList<string>> GetAllRequiredStatusChecksContexts(string owner, string name, string branch)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
             Ensure.ArgumentNotNullOrEmptyString(name, "name");
@@ -420,7 +416,7 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="branch">The name of the branch</param>
-        public Task<IReadOnlyList<string>> GetRequiredStatusChecksContexts(long repositoryId, string branch)
+        public Task<IReadOnlyList<string>> GetAllRequiredStatusChecksContexts(long repositoryId, string branch)
         {
             Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
 
@@ -539,6 +535,246 @@ namespace Octokit
         }
 
         /// <summary>
+        /// Get required pull request review enforcement of protected branch
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#get-pull-request-review-enforcement-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="owner">The owner of the repository</param>
+        /// <param name="name">The name of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        public Task<BranchProtectionRequiredReviews> GetReviewEnforcement(string owner, string name, string branch)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
+            Ensure.ArgumentNotNullOrEmptyString(name, "name");
+            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
+
+            return ApiConnection.Get<BranchProtectionRequiredReviews>(ApiUrls.RepoProtectedBranchReviewEnforcement(owner, name, branch), null, AcceptHeaders.ProtectedBranchesApiPreview);
+        }
+
+        /// <summary>
+        /// Get required pull request review enforcement of protected branch
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#get-admin-enforcement-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="repositoryId">The Id of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        public Task<BranchProtectionRequiredReviews> GetReviewEnforcement(long repositoryId, string branch)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
+
+            return ApiConnection.Get<BranchProtectionRequiredReviews>(ApiUrls.RepoProtectedBranchReviewEnforcement(repositoryId, branch), null, AcceptHeaders.ProtectedBranchesApiPreview);
+        }
+
+        /// <summary>
+        /// Update required pull request review enforcement of protected branch
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#update-pull-request-review-enforcement-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="owner">The owner of the repository</param>
+        /// <param name="name">The name of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        public Task<BranchProtectionRequiredReviews> UpdateReviewEnforcement(string owner, string name, string branch, BranchProtectionRequiredReviewsUpdate update)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
+            Ensure.ArgumentNotNullOrEmptyString(name, "name");
+            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
+            Ensure.ArgumentNotNull(update, nameof(update));
+
+            return ApiConnection.Patch<BranchProtectionRequiredReviews>(ApiUrls.RepoProtectedBranchReviewEnforcement(owner, name, branch), update, AcceptHeaders.ProtectedBranchesApiPreview);
+        }
+
+        /// <summary>
+        /// Update required pull request review enforcement of protected branch
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#update-pull-request-review-enforcement-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="repositoryId">The Id of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        public Task<BranchProtectionRequiredReviews> UpdateReviewEnforcement(long repositoryId, string branch, BranchProtectionRequiredReviewsUpdate update)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
+            Ensure.ArgumentNotNull(update, nameof(update));
+
+            return ApiConnection.Patch<BranchProtectionRequiredReviews>(ApiUrls.RepoProtectedBranchReviewEnforcement(repositoryId, branch), update, AcceptHeaders.ProtectedBranchesApiPreview);
+        }
+
+        /// <summary>
+        /// Remove required pull request review enforcement of protected branch
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#remove-pull-request-review-enforcement-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="owner">The owner of the repository</param>
+        /// <param name="name">The name of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        public async Task<bool> RemoveReviewEnforcement(string owner, string name, string branch)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
+            Ensure.ArgumentNotNullOrEmptyString(name, "name");
+            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
+
+            var endpoint = ApiUrls.RepoProtectedBranchReviewEnforcement(owner, name, branch);
+
+            try
+            {
+                var httpStatusCode = await Connection.Delete(endpoint, null, AcceptHeaders.ProtectedBranchesApiPreview).ConfigureAwait(false);
+                return httpStatusCode == HttpStatusCode.NoContent;
+            }
+            catch (NotFoundException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Remove required pull request review enforcement of protected branch
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#remove-pull-request-review-enforcement-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="repositoryId">The Id of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        public async Task<bool> RemoveReviewEnforcement(long repositoryId, string branch)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
+
+            var endpoint = ApiUrls.RepoProtectedBranchReviewEnforcement(repositoryId, branch);
+
+            try
+            {
+                var httpStatusCode = await Connection.Delete(endpoint, null, AcceptHeaders.ProtectedBranchesApiPreview).ConfigureAwait(false);
+                return httpStatusCode == HttpStatusCode.NoContent;
+            }
+            catch (NotFoundException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Get admin enforcement of protected branch
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#get-admin-enforcement-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="owner">The owner of the repository</param>
+        /// <param name="name">The name of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        public Task<EnforceAdmins> GetAdminEnforcement(string owner, string name, string branch)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
+            Ensure.ArgumentNotNullOrEmptyString(name, "name");
+            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
+
+            return ApiConnection.Get<EnforceAdmins>(ApiUrls.RepoProtectedBranchAdminEnforcement(owner, name, branch), null, AcceptHeaders.ProtectedBranchesApiPreview);
+        }
+
+        /// <summary>
+        /// Get admin enforcement of protected branch
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#get-admin-enforcement-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="repositoryId">The Id of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        public Task<EnforceAdmins> GetAdminEnforcement(long repositoryId, string branch)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
+
+            return ApiConnection.Get<EnforceAdmins>(ApiUrls.RepoProtectedBranchAdminEnforcement(repositoryId, branch), null, AcceptHeaders.ProtectedBranchesApiPreview);
+        }
+
+        /// <summary>
+        /// Add admin enforcement to protected branch
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#add-admin-enforcement-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="owner">The owner of the repository</param>
+        /// <param name="name">The name of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        public Task<EnforceAdmins> AddAdminEnforcement(string owner, string name, string branch)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
+            Ensure.ArgumentNotNullOrEmptyString(name, "name");
+            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
+
+            return ApiConnection.Post<EnforceAdmins>(ApiUrls.RepoProtectedBranchAdminEnforcement(owner, name, branch), new object(), AcceptHeaders.ProtectedBranchesApiPreview);
+        }
+
+        /// <summary>
+        /// Add admin enforcement to protected branch
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#add-admin-enforcement-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="repositoryId">The Id of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        public Task<EnforceAdmins> AddAdminEnforcement(long repositoryId, string branch)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
+
+            return ApiConnection.Post<EnforceAdmins>(ApiUrls.RepoProtectedBranchAdminEnforcement(repositoryId, branch), new object(), AcceptHeaders.ProtectedBranchesApiPreview);
+        }
+
+        /// <summary>
+        /// Remove admin enforcement on protected branch
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#remove-admin-enforcement-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="owner">The owner of the repository</param>
+        /// <param name="name">The name of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        public async Task<bool> RemoveAdminEnforcement(string owner, string name, string branch)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
+            Ensure.ArgumentNotNullOrEmptyString(name, "name");
+            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
+
+            var endpoint = ApiUrls.RepoProtectedBranchAdminEnforcement(owner, name, branch);
+
+            try
+            {
+                var httpStatusCode = await Connection.Delete(endpoint, null, AcceptHeaders.ProtectedBranchesApiPreview).ConfigureAwait(false);
+                return httpStatusCode == HttpStatusCode.NoContent;
+            }
+            catch (NotFoundException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Remove admin enforcement on protected branch
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#remove-admin-enforcement-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="repositoryId">The Id of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        public async Task<bool> RemoveAdminEnforcement(long repositoryId, string branch)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
+
+            var endpoint = ApiUrls.RepoProtectedBranchAdminEnforcement(repositoryId, branch);
+
+            try
+            {
+                var httpStatusCode = await Connection.Delete(endpoint, null, AcceptHeaders.ProtectedBranchesApiPreview).ConfigureAwait(false);
+                return httpStatusCode == HttpStatusCode.NoContent;
+            }
+            catch (NotFoundException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Get restrictions for the specified branch (applies only to Organization owned repositories)
         /// </summary>
         /// <remarks>
@@ -633,7 +869,36 @@ namespace Octokit
         /// <param name="owner">The owner of the repository</param>
         /// <param name="name">The name of the repository</param>
         /// <param name="branch">The name of the branch</param>
+        [Obsolete("Please use GetAllProtectedBranchTeamRestrictions instead")]
         public Task<IReadOnlyList<Team>> GetProtectedBranchTeamRestrictions(string owner, string name, string branch)
+        {
+            return GetAllProtectedBranchTeamRestrictions(owner, name, branch);
+        }
+
+        /// <summary>
+        /// Get team restrictions for the specified branch (applies only to Organization owned repositories)
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#list-team-restrictions-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="repositoryId">The Id of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        [Obsolete("Please use GetAllProtectedBranchTeamRestrictions instead")]
+        public Task<IReadOnlyList<Team>> GetProtectedBranchTeamRestrictions(long repositoryId, string branch)
+        {
+            return GetAllProtectedBranchTeamRestrictions(repositoryId, branch);
+        }
+
+        /// <summary>
+        /// Get team restrictions for the specified branch (applies only to Organization owned repositories)
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#list-team-restrictions-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="owner">The owner of the repository</param>
+        /// <param name="name">The name of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        public Task<IReadOnlyList<Team>> GetAllProtectedBranchTeamRestrictions(string owner, string name, string branch)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
             Ensure.ArgumentNotNullOrEmptyString(name, "name");
@@ -650,7 +915,7 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="branch">The name of the branch</param>
-        public Task<IReadOnlyList<Team>> GetProtectedBranchTeamRestrictions(long repositoryId, string branch)
+        public Task<IReadOnlyList<Team>> GetAllProtectedBranchTeamRestrictions(long repositoryId, string branch)
         {
             Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
 
@@ -777,7 +1042,36 @@ namespace Octokit
         /// <param name="owner">The owner of the repository</param>
         /// <param name="name">The name of the repository</param>
         /// <param name="branch">The name of the branch</param>
+        [Obsolete("Please use GetAllProtectedBranchUserRestrictions instead")]
         public Task<IReadOnlyList<User>> GetProtectedBranchUserRestrictions(string owner, string name, string branch)
+        {
+            return GetAllProtectedBranchUserRestrictions(owner, name, branch);
+        }
+
+        /// <summary>
+        /// Get user restrictions for the specified branch (applies only to Organization owned repositories)
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#list-user-restrictions-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="repositoryId">The Id of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        [Obsolete("Please use GetAllProtectedBranchUserRestrictions instead")]
+        public Task<IReadOnlyList<User>> GetProtectedBranchUserRestrictions(long repositoryId, string branch)
+        {
+            return GetAllProtectedBranchUserRestrictions(repositoryId, branch);
+        }
+
+        /// <summary>
+        /// Get user restrictions for the specified branch (applies only to Organization owned repositories)
+        /// </summary>
+        /// <remarks>
+        /// See the <a href="https://developer.github.com/v3/repos/branches/#list-user-restrictions-of-protected-branch">API documentation</a> for more details
+        /// </remarks>
+        /// <param name="owner">The owner of the repository</param>
+        /// <param name="name">The name of the repository</param>
+        /// <param name="branch">The name of the branch</param>
+        public Task<IReadOnlyList<User>> GetAllProtectedBranchUserRestrictions(string owner, string name, string branch)
         {
             Ensure.ArgumentNotNullOrEmptyString(owner, "owner");
             Ensure.ArgumentNotNullOrEmptyString(name, "name");
@@ -794,7 +1088,7 @@ namespace Octokit
         /// </remarks>
         /// <param name="repositoryId">The Id of the repository</param>
         /// <param name="branch">The name of the branch</param>
-        public Task<IReadOnlyList<User>> GetProtectedBranchUserRestrictions(long repositoryId, string branch)
+        public Task<IReadOnlyList<User>> GetAllProtectedBranchUserRestrictions(long repositoryId, string branch)
         {
             Ensure.ArgumentNotNullOrEmptyString(branch, "branch");
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using Octokit.Internal;
 
 namespace Octokit
 {
@@ -15,7 +16,7 @@ namespace Octokit
             Number = number;
         }
 
-        public PullRequest(long id, Uri url, Uri htmlUrl, Uri diffUrl, Uri patchUrl, Uri issueUrl, Uri statusesUrl, int number, ItemState state, string title, string body, DateTimeOffset createdAt, DateTimeOffset updatedAt, DateTimeOffset? closedAt, DateTimeOffset? mergedAt, GitReference head, GitReference @base, User user, User assignee, IReadOnlyList<User> assignees, bool? mergeable, User mergedBy, int comments, int reviewComments, int commits, int additions, int deletions, int changedFiles, Milestone milestone, bool locked)
+        public PullRequest(long id, string url, string htmlUrl, string diffUrl, string patchUrl, string issueUrl, string statusesUrl, int number, ItemState state, string title, string body, DateTimeOffset createdAt, DateTimeOffset updatedAt, DateTimeOffset? closedAt, DateTimeOffset? mergedAt, GitReference head, GitReference @base, User user, User assignee, IReadOnlyList<User> assignees, bool? mergeable, MergeableState? mergeableState, User mergedBy, string mergeCommitSha, int comments, int commits, int additions, int deletions, int changedFiles, Milestone milestone, bool locked, IReadOnlyList<User> requestedReviewers)
         {
             Id = id;
             Url = url;
@@ -38,15 +39,17 @@ namespace Octokit
             Assignee = assignee;
             Assignees = assignees;
             Mergeable = mergeable;
+            MergeableState = mergeableState;
             MergedBy = mergedBy;
+            MergeCommitSha = mergeCommitSha;
             Comments = comments;
-            ReviewComments = reviewComments;
             Commits = commits;
             Additions = additions;
             Deletions = deletions;
             ChangedFiles = changedFiles;
             Milestone = milestone;
             Locked = locked;
+            RequestedReviewers = requestedReviewers;
         }
 
         /// <summary>
@@ -57,32 +60,32 @@ namespace Octokit
         /// <summary>
         /// The URL for this pull request.
         /// </summary>
-        public Uri Url { get; protected set; }
+        public string Url { get; protected set; }
 
         /// <summary>
         /// The URL for the pull request page.
         /// </summary>
-        public Uri HtmlUrl { get; protected set; }
+        public string HtmlUrl { get; protected set; }
 
         /// <summary>
         /// The URL for the pull request's diff (.diff) file.
         /// </summary>
-        public Uri DiffUrl { get; protected set; }
+        public string DiffUrl { get; protected set; }
 
         /// <summary>
         /// The URL for the pull request's patch (.patch) file.
         /// </summary>
-        public Uri PatchUrl { get; protected set; }
+        public string PatchUrl { get; protected set; }
 
         /// <summary>
         /// The URL for the specific pull request issue.
         /// </summary>
-        public Uri IssueUrl { get; protected set; }
+        public string IssueUrl { get; protected set; }
 
         /// <summary>
         /// The URL for the pull request statuses.
         /// </summary>
-        public Uri StatusesUrl { get; protected set; }
+        public string StatusesUrl { get; protected set; }
 
         /// <summary>
         /// The pull request number.
@@ -92,7 +95,7 @@ namespace Octokit
         /// <summary>
         /// Whether the pull request is open or closed. The default is <see cref="ItemState.Open"/>.
         /// </summary>
-        public ItemState State { get; protected set; }
+        public StringEnum<ItemState> State { get; protected set; }
 
         /// <summary>
         /// Title of the pull request.
@@ -168,19 +171,28 @@ namespace Octokit
         public bool? Mergeable { get; protected set; }
 
         /// <summary>
+        /// Provides extra information regarding the mergeability of the pull request.
+        /// </summary>
+        public StringEnum<MergeableState>? MergeableState { get; protected set; }
+
+        /// <summary>
         /// The user who merged the pull request.
         /// </summary>
         public User MergedBy { get; protected set; }
 
         /// <summary>
+        /// The value of this field changes depending on the state of the pull request.
+        /// Not Merged - the hash of the test commit used to determine mergability.
+        /// Merged with merge commit - the hash of said merge commit.
+        /// Merged via squashing - the hash of the squashed commit added to the base branch.
+        /// Merged via rebase - the hash of the commit that the base branch was updated to.
+        /// </summary>
+        public string MergeCommitSha { get; protected set; }
+
+        /// <summary>
         /// Total number of comments contained in the pull request.
         /// </summary>
         public int Comments { get; protected set; }
-
-        /// <summary>
-        /// Total number of review comments contained in the pull request.
-        /// </summary>
-        public int ReviewComments { get; protected set; }
 
         /// <summary>
         /// Total number of commits contained in the pull request.
@@ -207,9 +219,62 @@ namespace Octokit
         /// </summary>
         public bool Locked { get; protected set; }
 
+        /// <summary>
+        /// Users requested for review
+        /// </summary>
+        public IReadOnlyList<User> RequestedReviewers { get; protected set; }
+
         internal string DebuggerDisplay
         {
             get { return string.Format(CultureInfo.InvariantCulture, "Number: {0} State: {1}", Number, State); }
         }
+    }
+
+    /// <summary>
+    /// Provides extra information regarding the mergeability of a pull request
+    /// </summary>
+    public enum MergeableState
+    {
+        /// <summary>
+        /// Merge conflict. Merging is blocked.
+        /// </summary>
+        [Parameter(Value = "dirty")]
+        Dirty,
+
+        /// <summary>
+        /// Mergeability was not checked yet. Merging is blocked.
+        /// </summary>
+        [Parameter(Value = "unknown")]
+        Unknown,
+
+        /// <summary>
+        /// Failing/missing required status check.  Merging is blocked.
+        /// </summary>
+        [Parameter(Value = "blocked")]
+        Blocked,
+
+        /// <summary>
+        /// Head branch is behind the base branch. Only if required status checks is enabled but loose policy is not. Merging is blocked.
+        /// </summary>
+        [Parameter(Value = "behind")]
+        Behind,
+
+        /// <summary>
+        /// Failing/pending commit status that is not part of the required status checks. Merging is still allowed.
+        /// </summary>
+        [Parameter(Value = "unstable")]
+        Unstable,
+
+        /// <summary>
+        /// GitHub Enterprise only, if a repo has custom pre-receive hooks. Merging is allowed.
+        /// </summary>
+        [Parameter(Value = "has_hooks")]
+        HasHooks,
+
+        /// <summary>
+        /// No conflicts, everything good. Merging is allowed.
+        /// </summary>
+        [Parameter(Value = "clean")]
+        Clean
     }
 }

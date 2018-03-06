@@ -5,7 +5,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{149448D4-C2F2-4DF9-86BD-03E3272F093B}</ProjectGuid>
+    <ProjectGuid>{E58EC0EA-B6E5-43AA-A7D2-AD0A6D4BB0D2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Octokit.Tests</RootNamespace>
