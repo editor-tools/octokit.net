@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{104E8324-C2B9-43BE-8040-36B736A64D45}</ProjectGuid>
+    <ProjectGuid>{08DD4305-7787-4823-A53F-4D0F725A07F3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Octokit</RootNamespace>
